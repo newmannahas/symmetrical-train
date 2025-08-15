@@ -6,15 +6,8 @@
   <title>The Storm – U10 Fall Soccer: Availability Poll</title>
   <style>
     :root{
-      /* Storm colors */
-      --bg:#0a0a0a;               /* page background */
-      --card:#141414;             /* card background */
-      --ink:#f5f5f5;              /* main text */
-      --muted:#cfcfcf;            /* muted text */
-      --brand:#e11d2e;            /* red */
-      --brand-2:#b91c1c;          /* darker red */
-      --ok:#16a34a;               /* green */
-      --err:#ef4444;              /* error red */
+      --bg:#0a0a0a; --card:#141414; --ink:#f5f5f5; --muted:#cfcfcf;
+      --brand:#e11d2e; --brand-2:#b91c1c; --ok:#16a34a; --err:#ef4444;
       --shadow: 0 10px 30px rgba(0,0,0,.5), 0 2px 8px rgba(0,0,0,.35);
       --radius:18px;
     }
@@ -84,10 +77,9 @@
 <body>
   <main class="card" role="main">
     <div class="header">
-      <!-- Swap src with your data-URI or URL if you prefer -->
       <img class="crest" src="storm-logo.png" alt="The Storm FC crest" />
       <h1>The Storm – U10 Fall Soccer: Availability Poll</h1>
-      <p class="sub">Pick one option and hit “Submit Vote.” Results update instantly. (Saved only in this browser.)</p>
+      <p class="sub">Pick one option and hit “Submit Vote.” Team-wide results refresh automatically below.</p>
     </div>
 
     <div class="content" aria-live="polite">
@@ -112,8 +104,7 @@
 
         <div class="buttons">
           <button type="submit" class="primary" id="submitBtn">Submit Vote</button>
-          <button type="button" class="ghost" id="showResultsBtn">Show Results</button>
-          <button type="button" class="ghost small" id="resetBtn" title="Clears votes saved in this browser only">Reset (this browser)</button>
+          <button type="button" class="ghost" id="refreshBtn" title="Force refresh from server">Refresh totals</button>
         </div>
       </form>
 
@@ -130,109 +121,130 @@
         <div class="bar" aria-hidden="true"><div id="bar3" class="barfill"></div></div>
 
         <div class="totals"><span class="tag" id="totalVotes">0 votes</span><span id="status"></span></div>
+        <div class="sub" id="lastUpdated" style="font-size:12px;"></div>
       </section>
     </div>
 
     <div class="footer">
-      <span>Private to this browser. For team-wide totals, host this and connect a backend (I can add Google Sheets or Supabase).</span>
-      <a class="link" href="#" id="exportBtn" title="Download current votes as JSON">Export</a>
+      <span>These results are live from the team’s sheet. (Auto-refreshes every 10s.)</span>
+      <a class="link" href="#" id="exportBtn" title="Download local cache as JSON">Export</a>
     </div>
   </main>
 
   <script>
-    const STORAGE_KEY = 'stormU10.poll.v1';
-    const VOTED_KEY = 'stormU10.poll.v1.voted';
+    // ⬇️ Replace this with your deployed Apps Script Web App URL
+    const WEB_APP_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL';
+
+    const CACHE_KEY = 'stormU10.poll.cache.v1';
+    const VOTED_KEY = 'stormU10.poll.voted.v1';
 
     const alertOk = document.getElementById('alert');
     const alertErr = document.getElementById('alert-error');
     const totalVotesEl = document.getElementById('totalVotes');
     const statusEl = document.getElementById('status');
+    const lastUpdatedEl = document.getElementById('lastUpdated');
+
     const bars = [null, document.getElementById('bar1'), document.getElementById('bar2'), document.getElementById('bar3')];
     const pcts = [null, document.getElementById('pct1'), document.getElementById('pct2'), document.getElementById('pct3')];
 
-    function getState(){
-      let s = localStorage.getItem(STORAGE_KEY);
-      if(!s){
-        const init = { votes: {1:0,2:0,3:0}, lastUpdated: new Date().toISOString() };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(init));
-        return init;
-      }
-      try { return JSON.parse(s); } catch {
-        const reset = { votes: {1:0,2:0,3:0}, lastUpdated: new Date().toISOString() };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(reset));
-        return reset;
-      }
-    }
-    function setState(next){
-      next.lastUpdated = new Date().toISOString();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    }
     function fmtPct(part, total){
       if(total <= 0) return '0%';
       const pct = Math.round((part/total)*100);
       return pct + '%';
     }
-    function render(){
-      const s = getState();
-      const total = s.votes[1] + s.votes[2] + s.votes[3];
-      const voted = localStorage.getItem(VOTED_KEY) === 'true';
 
-      pcts[1].textContent = fmtPct(s.votes[1], total);
-      pcts[2].textContent = fmtPct(s.votes[2], total);
-      pcts[3].textContent = fmtPct(s.votes[3], total);
-      bars[1].style.width = total? (s.votes[1]/total*100)+'%':'0%';
-      bars[2].style.width = total? (s.votes[2]/total*100)+'%':'0%';
-      bars[3].style.width = total? (s.votes[3]/total*100)+'%':'0%';
-      totalVotesEl.textContent = total + (total === 1 ? ' vote' : ' votes');
-      statusEl.textContent = voted ? 'You have voted.' : '';
+    function renderTotals(totals, total, updated) {
+      pcts[1].textContent = fmtPct(totals[1]||0, total);
+      pcts[2].textContent = fmtPct(totals[2]||0, total);
+      pcts[3].textContent = fmtPct(totals[3]||0, total);
+
+      bars[1].style.width = total ? ((totals[1]||0)/total*100) + '%' : '0%';
+      bars[2].style.width = total ? ((totals[2]||0)/total*100) + '%' : '0%';
+      bars[3].style.width = total ? ((totals[3]||0)/total*100) + '%' : '0%';
+
+      totalVotesEl.textContent = (total||0) + ((total===1)?' vote':' votes');
+      lastUpdatedEl.textContent = updated ? `Last updated: ${new Date(updated).toLocaleString()}` : '';
     }
+
+    function cacheSet(obj){ localStorage.setItem(CACHE_KEY, JSON.stringify(obj)); }
+    function cacheGet(){ try { return JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); } catch { return {}; } }
     function clearAlerts(){ alertOk.style.display='none'; alertErr.style.display='none'; }
 
-    document.getElementById('pollForm').addEventListener('submit', (e)=>{
+    async function fetchTotals() {
+      try {
+        const res = await fetch(WEB_APP_URL, { method: 'GET', cache: 'no-store' });
+        const data = await res.json();
+        if (data && data.ok) {
+          cacheSet(data);
+          renderTotals(data.totals, data.total, data.updated);
+          statusEl.textContent = 'Live totals';
+        } else {
+          statusEl.textContent = 'Using cached totals';
+          const cached = cacheGet();
+          if (cached.totals) renderTotals(cached.totals, cached.total, cached.updated);
+        }
+      } catch (e) {
+        statusEl.textContent = 'Offline: showing cached totals';
+        const cached = cacheGet();
+        if (cached.totals) renderTotals(cached.totals, cached.total, cached.updated);
+      }
+    }
+
+    async function postVote(choice){
+      const choice_label =
+        choice === '1' ? 'Monday only' :
+        choice === '2' ? 'Monday or Tuesday fine' :
+        'Tuesday better';
+      try {
+        await fetch(WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ choice, choice_label })
+        });
+      } catch (e) { /* ignore to keep UX snappy */ }
+    }
+
+    // Submit handling
+    document.getElementById('pollForm').addEventListener('submit', async (e)=>{
       e.preventDefault();
       clearAlerts();
       const formData = new FormData(e.currentTarget);
       const choice = formData.get('choice');
       if(!choice){ alertErr.style.display='block'; return; }
       if(localStorage.getItem(VOTED_KEY) === 'true'){
-        alertOk.textContent = 'You already voted in this browser.';
+        alertOk.textContent = 'You already voted on this device.';
         alertOk.style.display='block';
         return;
       }
-      const s = getState();
-      s.votes[choice] = (s.votes[choice]||0) + 1;
-      setState(s);
-      localStorage.setItem(VOTED_KEY, 'true');
       alertOk.textContent = 'Thanks — your vote was recorded.';
       alertOk.style.display='block';
-      render();
+
+      localStorage.setItem(VOTED_KEY, 'true');
+      statusEl.textContent = 'Submitting…';
+
+      await postVote(choice);
+      await fetchTotals(); // refresh live totals after vote
     });
 
-    document.getElementById('showResultsBtn').addEventListener('click', render);
-
-    document.getElementById('resetBtn').addEventListener('click', ()=>{
-      clearAlerts();
-      if(confirm('Reset votes stored in this browser? This does not affect anyone else.')){
-        localStorage.removeItem(STORAGE_KEY);
-        localStorage.removeItem(VOTED_KEY);
-        render();
-      }
-    });
-
+    // Manual refresh and export
+    document.getElementById('refreshBtn').addEventListener('click', fetchTotals);
     document.getElementById('exportBtn').addEventListener('click', (e)=>{
       e.preventDefault();
-      const data = new Blob([localStorage.getItem(STORAGE_KEY)||'{}'], {type:'application/json'});
+      const data = new Blob([localStorage.getItem(CACHE_KEY)||'{}'], {type:'application/json'});
       const a = document.createElement('a');
       a.href = URL.createObjectURL(data);
-      a.download = 'storm-u10-poll-results.json';
+      a.download = 'storm-u10-poll-cache.json';
       document.body.appendChild(a);
       a.click();
       URL.revokeObjectURL(a.href);
       a.remove();
     });
 
-    // Render on load
-    render();
+    // Kick off: show cached ASAP, then fetch live, then poll every 10s
+    const cached = cacheGet();
+    if (cached.totals) renderTotals(cached.totals, cached.total, cached.updated);
+    fetchTotals();
+    setInterval(fetchTotals, 10000);
   </script>
 </body>
 </html>
