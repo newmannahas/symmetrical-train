@@ -1,250 +1,985 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>The Storm – U10 Fall Soccer: Availability Poll</title>
-  <style>
-    :root{
-      --bg:#0a0a0a; --card:#141414; --ink:#f5f5f5; --muted:#cfcfcf;
-      --brand:#e11d2e; --brand-2:#b91c1c; --ok:#16a34a; --err:#ef4444;
-      --shadow: 0 10px 30px rgba(0,0,0,.5), 0 2px 8px rgba(0,0,0,.35);
-      --radius:18px;
-    }
-    html,body{height:100%;}
-    body{
-      margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji;
-      color:var(--ink);
-      background:radial-gradient(1200px 800px at 10% 10%, #1f1f1f 0%, #0a0a0a 60%),
-                 radial-gradient(1200px 800px at 90% 90%, #1a1a1a 0%, #0a0a0a 60%), var(--bg);
-      display:grid; place-items:center; padding:24px;
-    }
-    .card{
-      width:min(760px, 100%);
-      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
-      border:1px solid rgba(255,255,255,.12);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      overflow:hidden
-    }
-    .header{
-      padding:28px 28px 16px;
-      background:linear-gradient(135deg, rgba(225,29,46,.12), rgba(185,28,28,.12));
-      border-bottom:1px solid rgba(255,255,255,.12);
-      text-align:center
-    }
-    h1{margin:8px 0 6px; font-size: clamp(22px, 2.2vw, 28px); letter-spacing:.2px}
-    .sub{margin:0; color:var(--muted); font-size:14px}
-    .crest{
-      width:96px;height:96px;border-radius:22%;
-      box-shadow:0 6px 18px rgba(0,0,0,.35);
-      display:block;margin:0 auto 8px;object-fit:cover;border:1px solid rgba(255,255,255,.25)
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>⚽ SOCCER Rules Shootout — Question First → Scroll Down to Kick (Kids Mode)</title>
+<style>
+  /* =========================
+     THEME VARIABLES
+     ========================= */
+  :root{
+    --bg:#f6f7fb;
+    --ink:#0f172a;
+    --muted:#475569;
+    --card:#ffffff;
+    --border:rgba(15,23,42,.08);
+    --accent:#2563eb;
+    --accent-2:#22c55e;
+    --good:#16a34a;
+    --bad:#ef4444;
+    --chip:#eef2ff;
+    --chip-border:rgba(2,6,23,.08);
 
-    .content{display:grid; gap:22px; padding:22px;}
-    form{display:grid; gap:14px}
-    .option{
-      display:flex; gap:12px; align-items:flex-start; padding:14px;
-      border:1px solid rgba(255,255,255,.16); border-radius:12px; background:rgba(255,255,255,.03)
-    }
-    .option:hover{border-color: rgba(225,29,46,.55); background: rgba(225,29,46,.10)}
-    input[type="radio"]{margin-top:2px;}
-    .label{font-weight:700}
-    .buttons{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
-    button{
-      appearance:none; border:0; padding:12px 16px; border-radius:12px;
-      cursor:pointer; font-weight:800; letter-spacing:.2px
-    }
-    .primary{background: linear-gradient(135deg, var(--brand), var(--brand-2)); color:#fff}
-    .ghost{background:transparent; color:var(--muted); border:1px solid rgba(255,255,255,.18)}
-    .small{padding:8px 10px; font-weight:700; border-radius:10px}
+    --pitch:#6ebd8a;
+    --pitch-dark:#59a978;
+    --line:#ffffff;
+  }
+  body.theme-night{
+    --bg:#0f172a;
+    --ink:#e5e7eb;
+    --muted:#93a3b8;
+    --card:#0b1220;
+    --border:rgba(255,255,255,.08);
+    --accent:#60a5fa;
+    --accent-2:#34d399;
+    --good:#22c55e;
+    --bad:#f87171;
+    --chip:#0f172a;
+    --chip-border:rgba(255,255,255,.12);
 
-    .results{display:grid; gap:16px}
-    .bar{background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16); border-radius:12px; overflow:hidden}
-    .barfill{height:16px; width:0%; background:linear-gradient(90deg, var(--brand), var(--brand-2)); transition:width .6s cubic-bezier(.22,1,.36,1)}
-    .row{display:flex; justify-content:space-between; gap:12px; font-size:14px; color:var(--muted); margin-bottom:6px}
-    .totals{display:flex; gap:10px; align-items:center; color:var(--muted); font-size:13px}
-    .tag{border:1px solid rgba(255,255,255,.18); padding:6px 10px; border-radius:999px}
+    --pitch:#1d6b52;
+    --pitch-dark:#155e46;
+    --line:#eaf2ff;
+  }
+  body.theme-contrast{
+    --bg:#ffffff;
+    --ink:#111111;
+    --muted:#222222;
+    --card:#ffffff;
+    --border:#111;
+    --accent:#0000ff;
+    --accent-2:#008000;
+    --good:#008000;
+    --bad:#ff0000;
+    --chip:#ffffff;
+    --chip-border:#111;
 
-    .notice{display:none; border-left:4px solid var(--ok); background:rgba(34,197,94,.12); color:#d1fae5; padding:12px 14px; border-radius:12px}
-    .notice.error{border-left-color: var(--err); background: rgba(239,68,68,.12); color:#fee2e2}
+    --pitch:#1a1a1a;
+    --pitch-dark:#111111;
+    --line:#ffd000;
+  }
 
-    .footer{padding:16px 22px 22px; color:var(--muted); font-size:12px; display:flex; justify-content:space-between; align-items:center}
-    .link{color:#fca5a5; text-decoration:underline; text-underline-offset:2px}
-    .hidden{display:none}
-  </style>
+  /* =========================
+     BASE / LAYOUT
+     ========================= */
+  *{box-sizing:border-box}
+  html, body{ height:100%; }
+  body{
+    margin:0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji", "Segoe UI Symbol", Noto Color Emoji;
+    background:var(--bg);
+    color:var(--ink);
+    display:flex; flex-direction:column; min-height:100vh;
+    -webkit-user-select:none; user-select:none;
+    -webkit-touch-callout:none; -webkit-tap-highlight-color: transparent;
+    overflow-x:hidden;
+  }
+  header{
+    padding:10px 16px;
+    background:linear-gradient(0deg, rgba(0,0,0,.025), rgba(0,0,0,.025)), var(--card);
+    border-bottom:1px solid var(--border);
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  }
+  header h1{
+    font-size:18px; margin:0; display:flex; align-items:center; gap:8px;
+  }
+  header .rule-tag{
+    padding:4px 10px; border-radius:999px;
+    background:linear-gradient(135deg,var(--accent),#7dd3fc);
+    color:#06121a; font-weight:700;
+  }
+  header .info{ margin-left:auto; display:flex; gap:12px; font-size:14px; opacity:.95; }
+  header select{
+    background:var(--card); color:var(--ink); border:1px solid var(--border);
+    padding:6px 10px; border-radius:8px; font-weight:600;
+  }
+
+  .wrap{ display:grid; grid-template-columns:1fr; gap:12px; padding:12px; max-width:1100px; width:100%; margin:0 auto; }
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:12px 14px;
+    box-shadow:0 10px 30px rgba(0,0,0,.06);
+  }
+
+  /* =========================
+     QUESTION CARD
+     ========================= */
+  .qtop{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .qtop .breadcrumbs{ color:var(--muted); font-size:14px; }
+  .question{
+    font-size:clamp(22px, 3.6vw, 30px);  /* BIGGER for clarity */
+    line-height:1.45; font-weight:800; letter-spacing:.2px;
+  }
+  .options{ margin-top:12px; display:grid; gap:8px; grid-template-columns:1fr 1fr; }
+  .opt{
+    background: linear-gradient(0deg, rgba(0,0,0,.02), rgba(0,0,0,.02)), var(--card);
+    border:1px solid var(--border); border-radius:10px; padding:10px;
+    display:flex; gap:10px; align-items:flex-start;
+    font-size:clamp(16px, 2.4vw, 19px);
+  }
+  .opt .badge{
+    font-weight:800; width:28px; height:28px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center;
+    background:linear-gradient(180deg, #f8fafc, #e2e8f0); color:#0f172a; border:1px solid var(--border);
+    flex:0 0 auto;
+  }
+  .opt button{
+    margin-left:auto; background:var(--card); color:var(--ink); border:1px solid var(--border);
+    padding:6px 10px; border-radius:8px; font-weight:700; cursor:pointer;
+  }
+  .opt button:hover{ filter:brightness(1.03) }
+  .legend{ font-size:14px; color:var(--muted); display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+  .legend .chip{ background:var(--chip); border:1px solid var(--chip-border); padding:4px 8px; border-radius:999px }
+
+  .footer-bar{ display:flex; gap:10px; align-items:center; justify-content:space-between; margin-top:12px; }
+  .footer-bar .left{ display:flex; gap:10px; align-items:center }
+  .footer-bar button{
+    background:var(--card); color:var(--ink); border:1px solid var(--border);
+    padding:10px 14px; border-radius:10px; font-weight:800; cursor:pointer;
+  }
+  .footer-bar button.warn{ background:linear-gradient(135deg, #ffb4b4, var(--bad)); color:#230606; border:none }
+
+  .scoreboard{ display:flex; gap:14px; flex-wrap:wrap; align-items:center; font-weight:700; font-size:14px; }
+  .scoreboard .pill{ background:var(--chip); padding:6px 10px; border-radius:999px; border:1px solid var(--chip-border) }
+
+  /* =========================
+     ARENA (FIELD) — ALWAYS VISIBLE BELOW
+     ========================= */
+  .arena{
+    position:relative; width:100%; aspect-ratio:16/9;
+    background: repeating-linear-gradient(90deg, var(--pitch) 0 30px, var(--pitch-dark) 30px 60px);
+    border-radius:12px; border:2px solid var(--border);
+    overflow:hidden;
+    box-shadow:0 20px 50px rgba(0,0,0,.08), inset 0 0 0 3px rgba(255,255,255,.05);
+  }
+  @supports not (aspect-ratio: 1 / 1) { .arena{ height: min(64vh, 56.25vw); } }
+  .arena::before{ content:""; position:absolute; inset:12px; border:3px solid var(--line); border-radius:8px; pointer-events:none; }
+  .center-circle{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:160px; height:160px; border:3px solid var(--line); border-radius:50%; pointer-events:none; opacity:.7; }
+  .kick-line{ position:absolute; left:110px; top:12px; bottom:12px; width:2px; background:var(--line); opacity:.5; pointer-events:none; }
+  .goal-grid{ position:absolute; right:12px; top:12px; bottom:12px; width:48%; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:10px; }
+  .goal{ border:5px solid var(--line); border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:42px; color:var(--line); background:rgba(255,255,255,.10); position:relative; user-select:none; }
+  .goal .label{ position:absolute; bottom:6px; right:8px; background:rgba(0,0,0,.35); padding:2px 8px; border-radius:999px; font-size:12px; font-weight:700; letter-spacing:.4px; }
+
+  .ball{ position:absolute; width:46px; height:46px; border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, #fff 0 60%, #e9e9e9 61% 100%);
+    box-shadow: inset 0 0 0 2px #111, 0 12px 18px rgba(0,0,0,.45);
+    display:flex; align-items:center; justify-content:center; left:40px; top:calc(50% - 23px);
+    cursor:grab; touch-action:none; user-select:none; font-size:22px; }
+  .ball:active{ cursor:grabbing; }
+  .aim{ position:absolute; pointer-events:none; display:none; }
+  .aim .line{ height:3px; background:var(--accent); transform-origin:left center; box-shadow:0 0 8px rgba(37,99,235,.6); }
+  .aim .dot{ width:10px; height:10px; border:2px solid var(--accent); border-radius:50%; background:transparent; position:absolute; transform:translate(-50%,-50%); }
+
+  .pulse{ box-shadow: 0 0 0 0 rgba(37,99,235,0.8), inset 0 0 0 2px #111, 0 12px 18px rgba(0,0,0,.45); animation: pulse 1.2s ease-out 2; }
+  @keyframes pulse{ 0%{ box-shadow: 0 0 0 0 rgba(37,99,235,0.8), inset 0 0 0 2px #111, 0 12px 18px rgba(0,0,0,.45);} 100%{ box-shadow: 0 0 0 24px rgba(37,99,235,0);} }
+
+  .toast{ position:fixed; left:50%; bottom:20px; transform:translateX(-50%); background:rgba(0,0,0,.8); color:#fff; padding:10px 14px; border-radius:8px; border:1px solid rgba(255,255,255,.15); display:none; z-index:50; }
+  .overlay{ position:absolute; inset:0; display:none; align-items:center; justify-content:center; z-index:4; background:linear-gradient(180deg, rgba(0,0,0,.0), rgba(0,0,0,.55) 40%, rgba(0,0,0,.6)); text-align:center; padding:20px; }
+  .overlay .panel{ background:var(--card); border:1px solid var(--border); padding:16px; border-radius:12px; max-width:680px; color:var(--ink); }
+  .overlay h3{ margin:0 0 8px 0 }
+  .overlay .explain{ color:var(--muted); }
+  .overlay .big{ font-size:26px; font-weight:900; margin-bottom:6px; }
+  .overlay .big.good{ color:var(--good) }
+  .overlay .big.bad{ color:var(--bad) }
+  .progress-dots{ display:flex; gap:6px; flex-wrap:wrap; }
+  .progress-dots .dot{ width:10px; height:10px; border-radius:50%; background:#dbeafe; border:1px solid var(--border); }
+  body.theme-night .progress-dots .dot{ background:#23344d; }
+  .progress-dots .dot.done{ background:var(--accent-2) }
+  .progress-dots .dot.current{ background:var(--accent) }
+
+  .tiny{ font-size:12px; color:var(--muted) }
+  .hidden{ display:none !important }
+  @media (max-width: 840px){
+    .options{ grid-template-columns:1fr }
+    .goal-grid{ width:52% }
+    .kick-line{ left:90px }
+  }
+
+  /* =========================
+     START OVERLAY
+     ========================= */
+  .start-overlay{
+    position:fixed; inset:0;
+    background: radial-gradient(1200px 600px at 20% -10%, rgba(37,99,235,.10), transparent 60%),
+                radial-gradient(1200px 600px at 120% 110%, rgba(34,197,94,.10), transparent 60%),
+                var(--bg);
+    display:flex; align-items:center; justify-content:center; z-index:200;
+    padding:20px;
+  }
+  .start-panel{
+    background:var(--card); border:1px solid var(--border); border-radius:16px;
+    width:min(760px, 96vw); padding:18px; box-shadow:0 20px 60px rgba(0,0,0,.10);
+  }
+  .start-title{ margin:0 0 6px 0; font-size:clamp(22px, 3.4vw, 30px); display:flex; align-items:center; gap:8px; }
+  .start-sub{ margin:0 0 10px 0; color:var(--muted) }
+  .start-controls{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-top:12px }
+  .start-controls .left{ display:flex; gap:10px; align-items:center; flex-wrap:wrap }
+  .start-controls select{ background:var(--card); color:var(--ink); border:1px solid var(--border); padding:8px 10px; border-radius:10px; font-weight:700; }
+  .start-btn{ background:linear-gradient(135deg, var(--accent-2), var(--accent)); color:#061a12; border:none; padding:12px 18px; border-radius:12px; font-weight:900; cursor:pointer; }
+</style>
 </head>
-<body>
-  <main class="card" role="main">
-    <div class="header">
-      <img class="crest" src="storm-logo.png" alt="The Storm FC crest" />
-      <h1>The Storm – U10 Fall Soccer: Availability Poll</h1>
-      <p class="sub">Pick one option and hit “Submit Vote.” Team-wide results refresh automatically below.</p>
+<body class="theme-day">
+  <header>
+    <h1>⚽ <span class="rule-tag">SOCCER</span> Rules Shootout</h1>
+    <div class="info">
+      <div>Rule: <strong id="ruleName">—</strong></div>
+      <div>Question <span id="qNum">1</span>/5</div>
+      <div>Set <span id="setNum">1</span>/6</div>
     </div>
+    <div style="display:flex; gap:8px; align-items:center">
+      <label class="tiny">Theme</label>
+      <select id="themeSelect" aria-label="Theme">
+        <option value="day" selected>Day</option>
+        <option value="night">Night</option>
+        <option value="contrast">High Contrast</option>
+      </select>
+    </div>
+  </header>
 
-    <div class="content" aria-live="polite">
-      <div id="alert" class="notice" role="status">Thanks — your vote was recorded.</div>
-      <div id="alert-error" class="notice error" role="alert">Please select an option before submitting.</div>
-
-      <form id="pollForm">
-        <label class="option">
-          <input type="radio" name="choice" value="1" aria-label="Monday is the only day that works" />
-          <div><div class="label">1) Monday is the only day that works</div></div>
-        </label>
-
-        <label class="option">
-          <input type="radio" name="choice" value="2" aria-label="Monday or Tuesday are both fine" />
-          <div><div class="label">2) Monday or Tuesday are both fine</div></div>
-        </label>
-
-        <label class="option">
-          <input type="radio" name="choice" value="3" aria-label="Tuesday would work better" />
-          <div><div class="label">3) Tuesday would work better</div></div>
-        </label>
-
-        <div class="buttons">
-          <button type="submit" class="primary" id="submitBtn">Submit Vote</button>
-          <button type="button" class="ghost" id="refreshBtn" title="Force refresh from server">Refresh totals</button>
+  <!-- START OVERLAY -->
+  <div class="start-overlay" id="startOverlay" role="dialog" aria-modal="true">
+    <div class="start-panel">
+      <h2 class="start-title">⚽ SOCCER Rules Shootout</h2>
+      <p class="start-sub">Read the question first. Then <b>scroll down</b> and kick the ball at A/B/C/D to answer. Kids Mode is on by default.</p>
+      <div class="legend">
+        <div class="chip">Rule Sets: S • O • C • C • E • R</div>
+        <div class="chip">Touch‑friendly for iPhone/iPad</div>
+        <div class="chip">No internet required</div>
+      </div>
+      <div class="start-controls">
+        <div class="left">
+          <label class="tiny" for="themeSelectStart">Theme</label>
+          <select id="themeSelectStart" aria-label="Theme at start">
+            <option value="day" selected>Day</option>
+            <option value="night">Night</option>
+            <option value="contrast">High Contrast</option>
+          </select>
         </div>
-      </form>
+        <button id="startBtn" class="start-btn">Start Game ▶</button>
+      </div>
+    </div>
+  </div>
 
-      <section class="results" aria-labelledby="resultsHeading">
-        <h2 id="resultsHeading" class="hidden">Results</h2>
-
-        <div class="row"><span>1) Monday is the only day that works</span><span id="pct1">0%</span></div>
-        <div class="bar" aria-hidden="true"><div id="bar1" class="barfill"></div></div>
-
-        <div class="row"><span>2) Monday or Tuesday are both fine</span><span id="pct2">0%</span></div>
-        <div class="bar" aria-hidden="true"><div id="bar2" class="barfill"></div></div>
-
-        <div class="row"><span>3) Tuesday would work better</span><span id="pct3">0%</span></div>
-        <div class="bar" aria-hidden="true"><div id="bar3" class="barfill"></div></div>
-
-        <div class="totals"><span class="tag" id="totalVotes">0 votes</span><span id="status"></span></div>
-        <div class="sub" id="lastUpdated" style="font-size:12px;"></div>
-      </section>
+  <div class="wrap">
+    <!-- QUESTION FIRST CARD -->
+    <div class="card">
+      <div class="qtop">
+        <div class="breadcrumbs" id="breadcrumbs">—</div>
+        <div class="progress-dots" id="progressDots"></div>
+      </div>
+      <div class="question" id="question" aria-live="polite">—</div>
+      <div class="options" id="options"></div>
+      <div class="footer-bar" style="margin-top:12px">
+        <div class="left legend">
+          <div class="chip">Read the question</div>
+          <div class="chip">Then <b>scroll down</b> to the field and kick your answer</div>
+        </div>
+        <div>
+          <button id="resetBtn" class="warn">Reset Game</button>
+        </div>
+      </div>
     </div>
 
-    <div class="footer">
-      <span>These results are live from the team’s sheet. (Auto-refreshes every 10s.)</span>
-      <a class="link" href="#" id="exportBtn" title="Download local cache as JSON">Export</a>
+    <!-- ARENA BELOW (ALWAYS VISIBLE) -->
+    <div class="arena card" id="arena">
+      <div class="kick-line"></div>
+      <div class="center-circle"></div>
+
+      <div class="goal-grid" id="goalGrid">
+        <div class="goal" data-letter="A"><div>A</div><div class="label">Shoot at A</div></div>
+        <div class="goal" data-letter="B"><div>B</div><div class="label">Shoot at B</div></div>
+        <div class="goal" data-letter="C"><div>C</div><div class="label">Shoot at C</div></div>
+        <div class="goal" data-letter="D"><div>D</div><div class="label">Shoot at D</div></div>
+      </div>
+
+      <div class="ball" id="ball" aria-label="Soccer ball" title="Drag back and release to shoot">⚽</div>
+
+      <div class="aim" id="aim">
+        <div class="dot" id="aimDot"></div>
+        <div class="line" id="aimLine"></div>
+      </div>
+
+      <div class="overlay" id="overlay">
+        <div class="panel">
+          <div class="big" id="overlayTitle">Nice Shot!</div>
+          <h3 id="overlayPrompt">—</h3>
+          <p class="explain" id="overlayExplain">—</p>
+          <div style="margin-top:10px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap">
+            <button id="nextBtn" class="primary">Next Question ▶</button>
+            <button id="retryBtn">Replay Shot</button>
+          </div>
+          <div class="tiny" style="margin-top:8px">Tip: you can also tap an option’s “Auto Kick” to aim instantly.</div>
+        </div>
+      </div>
     </div>
-  </main>
 
-  <script>
-    // ⬇️ Replace this with your deployed Apps Script Web App URL
-    const WEB_APP_URL = 'YOUR_APPS_SCRIPT_WEB_APP_URL';
+    <!-- SCOREBOARD CARD -->
+    <div class="card">
+      <div style="display:flex; gap:8px; align-items:center; justify-content:space-between; flex-wrap:wrap">
+        <div class="legend">
+          <div class="chip">Kids Mode default</div>
+        </div>
+        <div class="scoreboard">
+          <div class="pill">Score: <span id="score">0</span></div>
+          <div class="pill">Best (this browser): <span id="best">0</span></div>
+          <div class="pill">Hearts ❤️: <span id="hearts">3</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    const CACHE_KEY = 'stormU10.poll.cache.v1';
-    const VOTED_KEY = 'stormU10.poll.voted.v1';
+  <div class="toast" id="toast">Saved!</div>
 
-    const alertOk = document.getElementById('alert');
-    const alertErr = document.getElementById('alert-error');
-    const totalVotesEl = document.getElementById('totalVotes');
-    const statusEl = document.getElementById('status');
-    const lastUpdatedEl = document.getElementById('lastUpdated');
-
-    const bars = [null, document.getElementById('bar1'), document.getElementById('bar2'), document.getElementById('bar3')];
-    const pcts = [null, document.getElementById('pct1'), document.getElementById('pct2'), document.getElementById('pct3')];
-
-    function fmtPct(part, total){
-      if(total <= 0) return '0%';
-      const pct = Math.round((part/total)*100);
-      return pct + '%';
-    }
-
-    function renderTotals(totals, total, updated) {
-      pcts[1].textContent = fmtPct(totals[1]||0, total);
-      pcts[2].textContent = fmtPct(totals[2]||0, total);
-      pcts[3].textContent = fmtPct(totals[3]||0, total);
-
-      bars[1].style.width = total ? ((totals[1]||0)/total*100) + '%' : '0%';
-      bars[2].style.width = total ? ((totals[2]||0)/total*100) + '%' : '0%';
-      bars[3].style.width = total ? ((totals[3]||0)/total*100) + '%' : '0%';
-
-      totalVotesEl.textContent = (total||0) + ((total===1)?' vote':' votes');
-      lastUpdatedEl.textContent = updated ? `Last updated: ${new Date(updated).toLocaleString()}` : '';
-    }
-
-    function cacheSet(obj){ localStorage.setItem(CACHE_KEY, JSON.stringify(obj)); }
-    function cacheGet(){ try { return JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); } catch { return {}; } }
-    function clearAlerts(){ alertOk.style.display='none'; alertErr.style.display='none'; }
-
-    async function fetchTotals() {
-      try {
-        const res = await fetch(WEB_APP_URL, { method: 'GET', cache: 'no-store' });
-        const data = await res.json();
-        if (data && data.ok) {
-          cacheSet(data);
-          renderTotals(data.totals, data.total, data.updated);
-          statusEl.textContent = 'Live totals';
-        } else {
-          statusEl.textContent = 'Using cached totals';
-          const cached = cacheGet();
-          if (cached.totals) renderTotals(cached.totals, cached.total, cached.updated);
-        }
-      } catch (e) {
-        statusEl.textContent = 'Offline: showing cached totals';
-        const cached = cacheGet();
-        if (cached.totals) renderTotals(cached.totals, cached.total, cached.updated);
+<script>
+// ----------------- Content -----------------
+const QUESTION_SETS = [
+  {
+    code:'S', name:'Stay in Your Role',
+    blurb:"Stick to your assigned spot. Players play, coaches coach, refs ref.",
+    questions:[
+      {
+        stem:"You’re playing <b>defender</b>. Our striker is dribbling toward their goal. What should you do?",
+        options:[
+          "Sprint forward to try to score too, leaving our half empty.",
+          "Hold your spot, talk with backs, be ready to stop a counterattack.",
+          "Switch with the keeper “for fun” this play.",
+          "Tell the ref how to coach the other team."
+        ],
+        correct:1,
+        why:"Defenders defend. Staying home protects team shape and stops fast breaks."
+      },
+      {
+        stem:"You’re a <b>midfielder</b> at kickoff. Coach says you’re on the left. Where should you play most?",
+        options:[
+          "Anywhere the ball goes, even if we end up stacked on top of each other.",
+          "Mostly the left side: help defend and attack from there to keep our shape.",
+          "Behind the goal to chat with a friend.",
+          "Wherever the ref can’t see you."
+        ],
+        correct:1,
+        why:"Staying in your lane keeps balance—no swarm-ball."
+      },
+      {
+        stem:"The ref gives the other team a throw‑in. You think it was ours. What now?",
+        options:[
+          "Argue until the call changes.",
+          "Get into position and defend. Refs ref; players play.",
+          "Shout that the ref needs glasses.",
+          "Walk away and stop trying."
+        ],
+        correct:1,
+        why:"Respect roles. Set up and win the ball back."
+      },
+      {
+        stem:"Halftime: coach is giving directions.",
+        options:[
+          "Talk over coach about your favorite video game.",
+          "Listen. Quiet mouth, eyes up. Ask questions when invited.",
+          "Coach yourself and ignore the plan.",
+          "Start making substitutions on your own."
+        ],
+        correct:1,
+        why:"Players play; coaches coach. Listening is part of the role."
+      },
+      {
+        stem:"You’re our <b>goalkeeper</b> on an opponent’s corner kick. What’s your job?",
+        options:[
+          "Run to midfield to try to score.",
+          "Stay in goal area, organize defenders, and be ready to catch/clear.",
+          "Take the corner for them to be nice.",
+          "Tie your shoes during the kick."
+        ],
+        correct:1,
+        why:"Keeper stays home and leads the defense."
       }
-    }
-
-    async function postVote(choice){
-      const choice_label =
-        choice === '1' ? 'Monday only' :
-        choice === '2' ? 'Monday or Tuesday fine' :
-        'Tuesday better';
-      try {
-        await fetch(WEB_APP_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ choice, choice_label })
-        });
-      } catch (e) { /* ignore to keep UX snappy */ }
-    }
-
-    // Submit handling
-    document.getElementById('pollForm').addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      clearAlerts();
-      const formData = new FormData(e.currentTarget);
-      const choice = formData.get('choice');
-      if(!choice){ alertErr.style.display='block'; return; }
-      if(localStorage.getItem(VOTED_KEY) === 'true'){
-        alertOk.textContent = 'You already voted on this device.';
-        alertOk.style.display='block';
-        return;
+    ]
+  },
+  {
+    code:'O', name:'Open on the Field, Closed Mouth',
+    blurb:"Move into space for passes. Be quiet when coaches/refs speak.",
+    questions:[
+      {
+        stem:"Your teammate has the ball and you’re <b>covered</b>. What’s best?",
+        options:[
+          "Stand right behind your defender and yell “Pass!”",
+          "Move into open space where your teammate can see you.",
+          "Run next to your teammate so you both trip.",
+          "Stop moving and hope the ball appears."
+        ],
+        correct:1,
+        why:"Get open by moving into space and showing for the pass."
+      },
+      {
+        stem:"Coach starts talking in practice.",
+        options:[
+          "Keep juggling and chat with a friend.",
+          "Mouth closed, eyes on coach, listen.",
+          "Shout your idea over coach’s voice.",
+          "Blow a whistle you found."
+        ],
+        correct:1,
+        why:"Closed mouth during instruction = respect and learning."
+      },
+      {
+        stem:"The ref makes a call you don’t like.",
+        options:[
+          "Roll your eyes and complain.",
+          "Zip it, reset, and play the next play.",
+          "Ask the crowd what they think.",
+          "Tell the ref you googled the rules."
+        ],
+        correct:1,
+        why:"Save your breath for the next run. Play on."
+      },
+      {
+        stem:"You want the ball on the wing. What should you do?",
+        options:[
+          "Drift into space and show a hand for the pass.",
+          "Hide behind two defenders.",
+          "Run off the field to be really open.",
+          "Lie down for a quick nap."
+        ],
+        correct:0,
+        why:"Show in a passing lane—open body, eye contact."
+      },
+      {
+        stem:"Team huddle while coach talks.",
+        options:[
+          "Whisper a joke to a buddy.",
+          "Quiet body, quiet mouth—listen up.",
+          "Sing the national anthem.",
+          "Practice bicycle kicks in the circle."
+        ],
+        correct:1,
+        why:"Open on the field, closed mouth during coaching."
       }
-      alertOk.textContent = 'Thanks — your vote was recorded.';
-      alertOk.style.display='block';
+    ]
+  },
+  {
+    code:'C1', name:'Stay Calm When Things Go Wrong',
+    blurb:"Breathe, reset, and play the next play.",
+    questions:[
+      {
+        stem:"You miss an easy shot. What now?",
+        options:[
+          "Kick the ground and yell.",
+          "Deep breath—‘next play’—hustle back.",
+          "Quit the game.",
+          "Blame the ball."
+        ],
+        correct:1,
+        why:"Calm minds make better next plays."
+      },
+      {
+        stem:"An opponent bumps you by accident.",
+        options:[
+          "Shove them back harder.",
+          "Take a breath, keep balance, play on.",
+          "Scream “foul!” and stop playing.",
+          "Give a long lecture."
+        ],
+        correct:1,
+        why:"Stay calm and keep control of the moment."
+      },
+      {
+        stem:"Your pass gets intercepted.",
+        options:[
+          "Freeze and sigh loudly.",
+          "Breathe; try to win it back or get into shape.",
+          "Tell teammates to do your job.",
+          "Ask to switch sports mid‑game."
+        ],
+        correct:1,
+        why:"Reset fast—defend or get in position."
+      },
+      {
+        stem:"You fall down.",
+        options:[
+          "Pound the grass.",
+          "Quick check you’re okay, pop up, rejoin.",
+          "Nap time.",
+          "Sneak a snack."
+        ],
+        correct:1,
+        why:"Fast recoveries help the team."
+      },
+      {
+        stem:"We’re losing with two minutes left.",
+        options:[
+          "Panic and boot the ball anywhere.",
+          "Breathe; make simple passes; look for good chances.",
+          "Trash talk to feel better.",
+          "Hide behind the goal."
+        ],
+        correct:1,
+        why:"Calm choices beat panic kicks."
+      }
+    ]
+  },
+  {
+    code:'C2', name:'Control Your Body and Play Fair',
+    blurb:"Use skill, not shoves. Keep everyone safe.",
+    questions:[
+      {
+        stem:"You’re defending a dribbler.",
+        options:[
+          "Use shoulder‑to‑shoulder and go for the ball.",
+          "Push in the back.",
+          "Grab the jersey.",
+          "Slide tackle from behind."
+        ],
+        correct:0,
+        why:"Fair contact + clean tackle = great defense."
+      },
+      {
+        stem:"Opponent is shielding the ball.",
+        options:[
+          "Run through them.",
+          "Move your feet around and poke the ball.",
+          "Step on their heel.",
+          "Yell in their ear."
+        ],
+        correct:1,
+        why:"Beat shielding with footwork, not fouls."
+      },
+      {
+        stem:"Ball is in the air and you’re a field player.",
+        options:[
+          "Punch it with your hand.",
+          "Chest it down or head it safely.",
+          "Catch it and throw to a friend.",
+          "Smack it like volleyball."
+        ],
+        correct:1,
+        why:"No hands (unless you’re the keeper in your box)."
+      },
+      {
+        stem:"You’re late to a tackle.",
+        options:[
+          "Swing your leg anyway and trip the player.",
+          "Slow down, contain, and wait for help.",
+          "Kick their ankle a little.",
+          "Slide tackle near their knees."
+        ],
+        correct:1,
+        why:"Contain first; tackle when you can do it safely."
+      },
+      {
+        stem:"Ref blows the whistle.",
+        options:[
+          "Keep playing and shoot.",
+          "Stop, back up, and give space for the kick.",
+          "Argue about the whistle volume.",
+          "Move the ball for the other team without asking."
+        ],
+        correct:1,
+        why:"Whistle = stop. Respect the restart."
+      }
+    ]
+  },
+  {
+    code:'E', name:'Encourage Teammates After Mistakes',
+    blurb:"Say “Good try!” and help teammates bounce back.",
+    questions:[
+      {
+        stem:"A teammate misses a shot.",
+        options:[
+          "“How could you miss that?!”",
+          "“Great run—next one!”",
+          "“Pass only to me next time.”",
+          "Silent glare."
+        ],
+        correct:1,
+        why:"Encouragement builds confidence and effort."
+      },
+      {
+        stem:"Goalkeeper lets one in.",
+        options:[
+          "“You’re the worst.”",
+          "“Shake it off—we’ve got you!”",
+          "“Totally your fault.”",
+          "Wave sarcastically."
+        ],
+        correct:1,
+        why:"Support your keeper. Next play!"
+      },
+      {
+        stem:"Teammate dribbles out of bounds.",
+        options:[
+          "“Pay attention!”",
+          "“I like the idea—try a pass‑and‑go next time!”",
+          "Roll your eyes.",
+          "Laugh."
+        ],
+        correct:1,
+        why:"Positive + specific beats criticism."
+      },
+      {
+        stem:"Teammate whiffs on a clearance.",
+        options:[
+          "“Yikes.”",
+          "“Right read—next one’s yours!”",
+          "“You owe us a goal.”",
+          "“Don’t play defense.”"
+        ],
+        correct:1,
+        why:"We praise the effort and get ready for the next play."
+      },
+      {
+        stem:"A new player makes a mistake.",
+        options:[
+          "“We don’t pass to rookies.”",
+          "“Welcome! Keep going—we’re glad you’re here.”",
+          "“Sit down.”",
+          "“Tell the coach you’re not ready.”"
+        ],
+        correct:1,
+        why:"Belonging makes teams better."
+      }
+    ]
+  },
+  {
+    code:'R', name:'Respect Everyone (even the other team)',
+    blurb:"Respect teammates, refs, and opponents—always.",
+    questions:[
+      {
+        stem:"Before the game.",
+        options:[
+          "Ignore the other team.",
+          "Line up, shake hands, say “Have a good game!”",
+          "Tell them you’ll crush them.",
+          "Block their warmup shots."
+        ],
+        correct:1,
+        why:"Start with sportsmanship."
+      },
+      {
+        stem:"After you score.",
+        options:[
+          "Mock the goalkeeper.",
+          "Celebrate with teammates, then reset.",
+          "Tell the other team they stink.",
+          "Stare down the ref."
+        ],
+        correct:1,
+        why:"Celebrate without disrespect."
+      },
+      {
+        stem:"An opponent is hurt.",
+        options:[
+          "Keep dribbling and ignore it.",
+          "Kick the ball out or stop if the ref whistles, and check on them.",
+          "Make fun of them.",
+          "Take their water."
+        ],
+        correct:1,
+        why:"People first. Soccer second."
+      },
+      {
+        stem:"The ref makes a tough call.",
+        options:[
+          "Boo the ref.",
+          "Respect the call and play on.",
+          "Announce your own rules.",
+          "Ask the crowd to vote."
+        ],
+        correct:1,
+        why:"Respect keeps the game safe and fun."
+      },
+      {
+        stem:"Opponents make a mistake.",
+        options:[
+          "Laugh loudly.",
+          "Encourage your team and keep playing.",
+          "Taunt them.",
+          "Copy the mistake to tease."
+        ],
+        correct:1,
+        why:"We lift our team—never tear others down."
+      }
+    ]
+  }
+];
 
-      localStorage.setItem(VOTED_KEY, 'true');
-      statusEl.textContent = 'Submitting…';
+// --- Simple localStorage helpers
+const STORAGE_KEY="soccer_rules_best";
+const THEME_KEY="soccer_rules_theme";
+const getBest=()=> Number(localStorage.getItem(STORAGE_KEY) || 0);
+const setBest=(v)=> localStorage.setItem(STORAGE_KEY, String(v));
+const getTheme=()=> localStorage.getItem(THEME_KEY) || 'day';
+const setTheme=(v)=> localStorage.setItem(THEME_KEY, v);
 
-      await postVote(choice);
-      await fetchTotals(); // refresh live totals after vote
+// --- DOM elements
+const ruleName = document.getElementById('ruleName');
+const setNum = document.getElementById('setNum');
+const qNum = document.getElementById('qNum');
+const questionEl = document.getElementById('question');
+const optionsEl = document.getElementById('options');
+const scoreEl = document.getElementById('score');
+const bestEl = document.getElementById('best');
+const heartsEl = document.getElementById('hearts');
+const breadcrumbsEl = document.getElementById('breadcrumbs');
+const progressDots = document.getElementById('progressDots');
+const resetBtn = document.getElementById('resetBtn');
+const arena = document.getElementById('arena');
+const ball = document.getElementById('ball');
+const overlay = document.getElementById('overlay');
+const overlayTitle = document.getElementById('overlayTitle');
+const overlayPrompt = document.getElementById('overlayPrompt');
+const overlayExplain = document.getElementById('overlayExplain');
+const nextBtn = document.getElementById('nextBtn');
+const retryBtn = document.getElementById('retryBtn');
+const aim = document.getElementById('aim');
+const aimLine = document.getElementById('aimLine');
+const aimDot = document.getElementById('aimDot');
+const goalGrid = document.getElementById('goalGrid');
+const toast = document.getElementById('toast');
+const startOverlay = document.getElementById('startOverlay');
+const startBtn = document.getElementById('startBtn');
+const themeSelect = document.getElementById('themeSelect');
+const themeSelectStart = document.getElementById('themeSelectStart');
+
+let state = {
+  setIndex:0, qIndex:0, score:0, hearts:3, answered:false,
+  vx:0, vy:0, raf:0, dragging:false, dragStart:null, lastTime:0
+};
+
+function clamp(n,min,max){ return Math.max(min, Math.min(max,n)); }
+function showToast(msg){ toast.textContent=msg; toast.style.display='block'; setTimeout(()=> toast.style.display='none', 1500); }
+function buildProgress(){
+  progressDots.innerHTML='';
+  for(let i=0;i<5;i++){
+    const d=document.createElement('div'); d.className='dot';
+    if(i<state.qIndex) d.classList.add('done');
+    if(i===state.qIndex) d.classList.add('current');
+    progressDots.appendChild(d);
+  }
+}
+
+function applyTheme(val){
+  const cls = 'theme-' + val;
+  document.body.classList.remove('theme-day','theme-night','theme-contrast');
+  document.body.classList.add(cls);
+  setTheme(val);
+  // sync both selectors
+  themeSelect.value = val;
+  themeSelectStart.value = val;
+}
+themeSelect.addEventListener('change',(e)=> applyTheme(e.target.value));
+themeSelectStart.addEventListener('change',(e)=> applyTheme(e.target.value));
+
+resetBtn.addEventListener('click', ()=>{
+  if(!confirm('Reset score and restart from the first rule?')) return;
+  state = { setIndex:0, qIndex:0, score:0, hearts:3, answered:false, vx:0, vy:0, raf:0, dragging:false, dragStart:null, lastTime:0 };
+  bestEl.textContent = getBest();
+  scoreEl.textContent = '0'; heartsEl.textContent='3';
+  loadCurrent();
+  showToast('Game reset');
+});
+
+startBtn.addEventListener('click', ()=>{
+  startOverlay.style.display='none';
+  // ensure theme from start select applied
+  applyTheme(themeSelectStart.value);
+  // scroll question into view
+  document.querySelector('.question').scrollIntoView({behavior:'smooth', block:'center'});
+});
+
+function currentSet(){ return QUESTION_SETS[state.setIndex]; }
+function currentQ(){ return currentSet().questions[state.qIndex]; }
+
+function loadCurrent(){
+  const set = currentSet();
+  const q = currentQ();
+  ruleName.textContent = `${set.code} – ${set.name}`;
+  setNum.textContent = state.setIndex+1;
+  qNum.textContent = state.qIndex+1;
+  questionEl.innerHTML = q.stem;
+  buildProgress();
+  breadcrumbsEl.innerHTML = `<b>${set.code}</b> ${set.name} &nbsp;•&nbsp; ${set.blurb}`;
+  const letters = ['A','B','C','D'];
+  optionsEl.innerHTML='';
+  q.options.forEach((txt, i)=>{
+    const div = document.createElement('div'); div.className='opt';
+    const badge = document.createElement('div'); badge.className='badge'; badge.textContent=letters[i];
+    const span = document.createElement('div'); span.innerHTML = txt;
+    const btn = document.createElement('button'); btn.textContent='Auto Kick → ' + letters[i];
+    btn.addEventListener('click', ()=>{
+      // Auto kick instantly on the field below
+      autoKickTo(letters[i]);
+      // also ensure the field is in view so kids see the shot happen
+      arena.scrollIntoView({behavior:'smooth', block:'center'});
     });
+    div.appendChild(badge); div.appendChild(span); div.appendChild(btn);
+    optionsEl.appendChild(div);
+  });
+  resetBall();
+  // make sure users read first by scrolling to question
+  document.querySelector('.question').scrollIntoView({behavior:'smooth', block:'center'});
+}
+function resetBall(){
+  cancelAnimationFrame(state.raf);
+  state.vx=0; state.vy=0;
+  ball.style.left = '40px';
+  ball.style.top = `calc(50% - 23px)`;
+  aim.style.display='none';
+  state.answered=false;
+}
 
-    // Manual refresh and export
-    document.getElementById('refreshBtn').addEventListener('click', fetchTotals);
-    document.getElementById('exportBtn').addEventListener('click', (e)=>{
-      e.preventDefault();
-      const data = new Blob([localStorage.getItem(CACHE_KEY)||'{}'], {type:'application/json'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(data);
-      a.download = 'storm-u10-poll-cache.json';
-      document.body.appendChild(a);
-      a.click();
-      URL.revokeObjectURL(a.href);
-      a.remove();
-    });
+function nextQuestion(){
+  state.qIndex++;
+  if(state.qIndex>=5){
+    state.qIndex=0; state.setIndex++;
+    if(state.setIndex>=QUESTION_SETS.length){
+      const best = getBest();
+      if(state.score>best){ setBest(state.score); }
+      bestEl.textContent = getBest();
+      alert(`Full-Time! 🚨\nYou finished all SOCCER rules.\nFinal Score: ${state.score}\nBest (this browser): ${getBest()}\n\nTip: Replay to beat your best!`);
+      state.setIndex=0; state.qIndex=0; state.score=0; state.hearts=3;
+    }
+  }
+  loadCurrent();
+}
 
-    // Kick off: show cached ASAP, then fetch live, then poll every 10s
-    const cached = cacheGet();
-    if (cached.totals) renderTotals(cached.totals, cached.total, cached.updated);
-    fetchTotals();
-    setInterval(fetchTotals, 10000);
-  </script>
+function showOverlay(isCorrect, explain){
+  overlayTitle.className = 'big ' + (isCorrect ? 'good' : 'bad');
+  overlayTitle.textContent = isCorrect ? 'GOAL! ✅' : 'Missed Shot ❌';
+  overlayExplain.textContent = explain || '';
+  overlayPrompt.innerHTML = currentQ().stem;
+  overlay.style.display='flex';
+  nextBtn.focus();
+}
+nextBtn.addEventListener('click', ()=> { overlay.style.display='none'; nextQuestion(); });
+retryBtn.addEventListener('click', ()=> { overlay.style.display='none'; resetBall(); arena.scrollIntoView({behavior:'smooth', block:'center'}); });
+
+// --- Physics & shooting
+let lastTS=0;
+function step(ts){
+  state.raf = requestAnimationFrame(step);
+  const dt = Math.max(0.2, Math.min(2.5, (ts - lastTS) / 16.67));
+  lastTS = ts;
+  let x = parseFloat(ball.style.left);
+  let y = parseFloat(ball.style.top);
+  x += state.vx * dt; y += state.vy * dt;
+  state.vx *= 0.985; state.vy *= 0.985;
+  const a = arena.getBoundingClientRect();
+  const bw = 46, bh = 46, pad = 12;
+  const minX = pad; const maxX = a.width - pad - bw;
+  const minY = pad; const maxY = a.height - pad - bh;
+  if(x<minX){ x=minX; state.vx = -state.vx*0.4; }
+  if(x>maxX){ x=maxX; state.vx = -state.vx*0.4; }
+  if(y<minY){ y=minY; state.vy = -state.vy*0.4; }
+  if(y>maxY){ y=maxY; state.vy = -state.vy*0.4; }
+  ball.style.left = x + 'px'; ball.style.top = y + 'px';
+  checkGoalHit();
+  if(Math.hypot(state.vx, state.vy) < 0.2){ state.vx = state.vy = 0; cancelAnimationFrame(state.raf); }
+}
+function centerOfBall(){ const b = ball.getBoundingClientRect(); return { x:b.left+b.width/2, y:b.top+b.height/2 }; }
+function checkGoalHit(){
+  if(state.answered) return;
+  const c = centerOfBall();
+  const goals = document.querySelectorAll('.goal');
+  for(const g of goals){
+    const r = g.getBoundingClientRect();
+    if(c.x>=r.left && c.x<=r.right && c.y>=r.top && c.y<=r.bottom){
+      const letter = g.getAttribute('data-letter');
+      handleAnswer(letter); break;
+    }
+  }
+}
+function autoKickTo(letter){
+  if(state.answered) return;
+  const g = [...document.querySelectorAll('.goal')].find(el=> el.getAttribute('data-letter')===letter);
+  if(!g) return;
+  const ar = arena.getBoundingClientRect();
+  const gr = g.getBoundingClientRect();
+  const targetX = gr.left - ar.left + gr.width/2 - 23;
+  const targetY = gr.top - ar.top + gr.height/2 - 23;
+  ball.style.left = targetX + 'px';
+  ball.style.top  = targetY + 'px';
+  handleAnswer(letter);
+}
+function handleAnswer(letter){
+  state.answered = true;
+  cancelAnimationFrame(state.raf);
+  const map = {A:0,B:1,C:2,D:3};
+  const pick = map[letter];
+  const q = currentQ();
+  const correctIndex = q.correct;
+  const isCorrect = pick === correctIndex;
+  if(isCorrect){
+    state.score += 2; scoreEl.textContent = state.score;
+    const best = getBest(); if(state.score > best){ setBest(state.score); bestEl.textContent = state.score; }
+  }else{
+    state.hearts = Math.max(0, state.hearts - 1); heartsEl.textContent = state.hearts;
+  }
+  showOverlay(isCorrect, q.why);
+  if(state.hearts===0){
+    setTimeout(()=>{
+      alert('Out of hearts! Taking a breather and resetting this rule set.');
+      state.hearts = 3; heartsEl.textContent='3'; state.qIndex = 0; loadCurrent();
+    }, 100);
+  }
+}
+
+function startDrag(ev){
+  ev.preventDefault();
+  state.dragging = true;
+  const pt = getPoint(ev);
+  state.dragStart = pt;
+  aim.style.display='block';
+  aimDot.style.left = pt.x + 'px'; aimDot.style.top  = pt.y + 'px';
+  aimLine.style.position='absolute'; aimLine.style.left = pt.x + 'px'; aimLine.style.top  = pt.y + 'px';
+  aimLine.style.width = '0px'; aimLine.style.height = '3px';
+  state.vx = state.vy = 0;
+  cancelAnimationFrame(state.raf);
+}
+function moveDrag(ev){
+  if(!state.dragging) return;
+  ev.preventDefault();
+  const start = state.dragStart; const pt = getPoint(ev);
+  const dx = start.x - pt.x; const dy = start.y - pt.y;
+  const power = Math.max(0, Math.min(90, Math.hypot(dx,dy)/3));
+  const angle = Math.atan2(dy, dx);
+  aimLine.style.display='block';
+  aimLine.style.width = power + 'px';
+  aimLine.style.transform = `rotate(${angle}rad)`;
+}
+function endDrag(ev){
+  if(!state.dragging) return;
+  ev.preventDefault();
+  const start = state.dragStart; const pt = getPoint(ev);
+  state.dragging = false; aim.style.display='none';
+  const scale = 0.14;
+  state.vx = (start.x - pt.x) * scale;
+  state.vy = (start.y - pt.y) * scale;
+  cancelAnimationFrame(state.raf);
+  state.raf = requestAnimationFrame(step);
+}
+function getPoint(ev){
+  const a = arena.getBoundingClientRect();
+  let x,y;
+  if(ev.touches && ev.touches[0]){ x = ev.touches[0].clientX - a.left; y = ev.touches[0].clientY - a.top; }
+  else { x = ev.clientX - a.left; y = ev.clientY - a.top; }
+  return {x,y};
+}
+
+ball.addEventListener('mousedown', startDrag);
+ball.addEventListener('touchstart', startDrag, {passive:false});
+window.addEventListener('mousemove', moveDrag, {passive:false});
+window.addEventListener('touchmove', moveDrag, {passive:false});
+window.addEventListener('mouseup', endDrag);
+window.addEventListener('touchend', endDrag, {passive:false});
+
+window.addEventListener('resize', ()=>{ resetBall(); });
+
+// Initialize
+bestEl.textContent = getBest();
+loadCurrent();
+// Theme from storage (default Day)
+applyTheme(getTheme());
+</script>
 </body>
 </html>
