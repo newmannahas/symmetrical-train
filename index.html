@@ -3,168 +3,105 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>⚽ SOCCER Rules Shootout — Question First → Scroll Down to Kick (Kids Mode, No Auto-Shoot)</title>
+<title>⚽ SOCCER Rules Shootout — Question First → Scroll Down to Kick (No Auto‑Shoot, Stable Physics)</title>
 <style>
-  /* =========================
-     THEMES
-     ========================= */
+  /* ---- THEME VARS ---- */
   :root{
-    --bg:#f6f7fb;
-    --ink:#0f172a;
-    --muted:#475569;
-    --card:#ffffff;
-    --border:rgba(15,23,42,.08);
-    --accent:#2563eb;
-    --accent-2:#22c55e;
-    --good:#16a34a;
-    --bad:#ef4444;
-    --chip:#eef2ff;
-    --chip-border:rgba(2,6,23,.08);
-    --pitch:#6ebd8a;
-    --pitch-dark:#59a978;
-    --line:#ffffff;
+    --bg:#f6f7fb; --ink:#0f172a; --muted:#475569; --card:#ffffff; --border:rgba(15,23,42,.08);
+    --accent:#2563eb; --accent-2:#22c55e; --good:#16a34a; --bad:#ef4444;
+    --chip:#eef2ff; --chip-border:rgba(2,6,23,.08);
+    --pitch:#6ebd8a; --pitch-dark:#59a978; --line:#ffffff;
   }
   body.theme-night{
     --bg:#0f172a; --ink:#e5e7eb; --muted:#93a3b8; --card:#0b1220; --border:rgba(255,255,255,.08);
-    --accent:#60a5fa; --accent-2:#34d399; --good:#22c55e; --bad:#f87171; --chip:#0f172a; --chip-border:rgba(255,255,255,.12);
+    --accent:#60a5fa; --accent-2:#34d399; --good:#22c55e; --bad:#f87171;
+    --chip:#0f172a; --chip-border:rgba(255,255,255,.12);
     --pitch:#1d6b52; --pitch-dark:#155e46; --line:#eaf2ff;
   }
   body.theme-contrast{
-    --bg:#ffffff; --ink:#111111; --muted:#222222; --card:#ffffff; --border:#111; --accent:#0000ff; --accent-2:#008000;
-    --good:#008000; --bad:#ff0000; --chip:#ffffff; --chip-border:#111; --pitch:#1a1a1a; --pitch-dark:#111111; --line:#ffd000;
+    --bg:#ffffff; --ink:#111111; --muted:#222222; --card:#ffffff; --border:#111;
+    --accent:#0000ff; --accent-2:#008000; --good:#008000; --bad:#ff0000;
+    --chip:#ffffff; --chip-border:#111;
+    --pitch:#1a1a1a; --pitch-dark:#111111; --line:#ffd000;
   }
 
-  /* =========================
-     BASE / LAYOUT
-     ========================= */
+  /* ---- BASE LAYOUT ---- */
   *{box-sizing:border-box}
-  html, body{ height:100%; }
+  html, body{ height:100% }
   body{
-    margin:0;
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji", "Segoe UI Symbol", Noto Color Emoji;
-    background:var(--bg);
-    color:var(--ink);
-    display:flex; flex-direction:column; min-height:100vh;
-    -webkit-user-select:none; user-select:none;
-    -webkit-touch-callout:none; -webkit-tap-highlight-color: transparent;
-    overscroll-behavior-y: contain; /* keep Safari from rubber-banding while dragging */
+    margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+    background:var(--bg); color:var(--ink); display:flex; flex-direction:column; min-height:100vh;
+    -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; -webkit-tap-highlight-color:transparent;
+    overscroll-behavior-y:contain; /* stop rubber-banding while dragging */
   }
   header{
-    padding:10px 16px;
-    background:linear-gradient(0deg, rgba(0,0,0,.025), rgba(0,0,0,.025)), var(--card);
-    border-bottom:1px solid var(--border);
-    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    padding:10px 16px; background:linear-gradient(0deg,rgba(0,0,0,.025),rgba(0,0,0,.025)), var(--card);
+    border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; flex-wrap:wrap;
   }
-  header h1{ font-size:18px; margin:0; display:flex; align-items:center; gap:8px; }
-  header .rule-tag{ padding:4px 10px; border-radius:999px; background:linear-gradient(135deg,var(--accent),#7dd3fc); color:#06121a; font-weight:700; }
-  header .info{ margin-left:auto; display:flex; gap:12px; font-size:14px; opacity:.95; }
-  header select{
-    background:var(--card); color:var(--ink); border:1px solid var(--border);
-    padding:6px 10px; border-radius:8px; font-weight:600;
-  }
+  header h1{ margin:0; font-size:18px; display:flex; align-items:center; gap:8px }
+  header .rule-tag{ padding:4px 10px; border-radius:999px; background:linear-gradient(135deg,var(--accent),#7dd3fc); color:#06121a; font-weight:700 }
+  header .info{ margin-left:auto; display:flex; gap:12px; font-size:14px; opacity:.95 }
+  header select{ background:var(--card); color:var(--ink); border:1px solid var(--border); padding:6px 10px; border-radius:8px; font-weight:600 }
 
-  .wrap{ display:grid; grid-template-columns:1fr; gap:12px; padding:12px; max-width:1100px; width:100%; margin:0 auto; }
-  .card{
-    background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px 14px;
-    box-shadow:0 10px 30px rgba(0,0,0,.06);
-  }
+  .wrap{ display:grid; grid-template-columns:1fr; gap:12px; padding:12px; max-width:1100px; width:100%; margin:0 auto }
+  .card{ background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px 14px; box-shadow:0 10px 30px rgba(0,0,0,.06) }
 
-  /* =========================
-     QUESTION CARD
-     ========================= */
-  .qtop{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between; margin-bottom:8px; }
-  .qtop .breadcrumbs{ color:var(--muted); font-size:14px; }
-  .question{ font-size:clamp(22px, 3.6vw, 30px); line-height:1.45; font-weight:800; letter-spacing:.2px; }
-  .options{ margin-top:12px; display:grid; gap:8px; grid-template-columns:1fr 1fr; }
-  .opt{
-    background: linear-gradient(0deg, rgba(0,0,0,.02), rgba(0,0,0,.02)), var(--card);
-    border:1px solid var(--border); border-radius:10px; padding:10px;
-    display:flex; gap:10px; align-items:flex-start; font-size:clamp(16px, 2.4vw, 19px);
-  }
-  .opt .badge{
-    font-weight:800; width:28px; height:28px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center;
-    background:linear-gradient(180deg, #f8fafc, #e2e8f0); color:#0f172a; border:1px solid var(--border); flex:0 0 auto;
-  }
-  .legend{ font-size:14px; color:var(--muted); display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+  /* ---- QUESTION CARD ---- */
+  .qtop{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between; margin-bottom:8px }
+  .qtop .breadcrumbs{ color:var(--muted); font-size:14px }
+  .question{ font-size:clamp(22px, 3.6vw, 30px); line-height:1.45; font-weight:800; letter-spacing:.2px }
+  .options{ margin-top:12px; display:grid; gap:8px; grid-template-columns:1fr 1fr }
+  .opt{ background:linear-gradient(0deg,rgba(0,0,0,.02),rgba(0,0,0,.02)), var(--card); border:1px solid var(--border); border-radius:10px; padding:10px; display:flex; gap:10px; align-items:flex-start; font-size:clamp(16px, 2.4vw, 19px) }
+  .opt .badge{ font-weight:800; width:28px; height:28px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; background:linear-gradient(180deg,#f8fafc,#e2e8f0); color:#0f172a; border:1px solid var(--border); flex:0 0 auto }
+  .legend{ font-size:14px; color:var(--muted); display:flex; flex-wrap:wrap; gap:10px; align-items:center }
   .legend .chip{ background:var(--chip); border:1px solid var(--chip-border); padding:4px 8px; border-radius:999px }
 
-  .footer-bar{ display:flex; gap:10px; align-items:center; justify-content:space-between; margin-top:12px; }
-  .footer-bar .left{ display:flex; gap:10px; align-items:center }
-
-  .scoreboard{ display:flex; gap:14px; flex-wrap:wrap; align-items:center; font-weight:700; font-size:14px; }
-  .scoreboard .pill{ background:var(--chip); padding:6px 10px; border-radius:999px; border:1px solid var(--chip-border) }
-
-  /* =========================
-     ARENA (FIELD) — BELOW
-     ========================= */
+  /* ---- FIELD ---- */
   .arena{
     position:relative; width:100%; aspect-ratio:16/9;
-    background: repeating-linear-gradient(90deg, var(--pitch) 0 30px, var(--pitch-dark) 30px 60px);
-    border-radius:12px; border:2px solid var(--border);
-    overflow:hidden;
-    box-shadow:0 20px 50px rgba(0,0,0,.08), inset 0 0 0 3px rgba(255,255,255,.05);
+    background:repeating-linear-gradient(90deg,var(--pitch) 0 30px, var(--pitch-dark) 30px 60px);
+    border-radius:12px; border:2px solid var(--border); overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,.08), inset 0 0 0 3px rgba(255,255,255,.05);
     touch-action:none; /* critical for iOS drag */
   }
-  @supports not (aspect-ratio: 1 / 1) { .arena{ height: min(64vh, 56.25vw); } }
-  .arena::before{ content:""; position:absolute; inset:12px; border:3px solid var(--line); border-radius:8px; pointer-events:none; }
-  .center-circle{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:160px; height:160px; border:3px solid var(--line); border-radius:50%; pointer-events:none; opacity:.7; }
-  .kick-line{ position:absolute; left:110px; top:12px; bottom:12px; width:2px; background:var(--line); opacity:.5; pointer-events:none; }
-  .goal-grid{ position:absolute; right:12px; top:12px; bottom:12px; width:48%; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:10px; }
-  .goal{ border:5px solid var(--line); border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:42px; color:var(--line); background:rgba(255,255,255,.10); position:relative; user-select:none; }
-  .goal .label{ position:absolute; bottom:6px; right:8px; background:rgba(0,0,0,.35); padding:2px 8px; border-radius:999px; font-size:12px; font-weight:700; letter-spacing:.4px; }
+  @supports not (aspect-ratio:1/1){ .arena{ height:min(64vh, 56.25vw) } }
+  .arena::before{ content:""; position:absolute; inset:12px; border:3px solid var(--line); border-radius:8px; pointer-events:none }
+  .center-circle{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:160px; height:160px; border:3px solid var(--line); border-radius:50%; pointer-events:none; opacity:.7 }
+  .kick-line{ position:absolute; left:110px; top:12px; bottom:12px; width:2px; background:var(--line); opacity:.5; pointer-events:none }
+  .goal-grid{ position:absolute; right:12px; top:12px; bottom:12px; width:48%; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:10px }
+  .goal{ border:5px solid var(--line); border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:42px; color:var(--line); background:rgba(255,255,255,.10); position:relative; user-select:none }
+  .goal .label{ position:absolute; bottom:6px; right:8px; background:rgba(0,0,0,.35); padding:2px 8px; border-radius:999px; font-size:12px; font-weight:700; letter-spacing:.4px }
 
-  .ball{
-    position:absolute; width:46px; height:46px; border-radius:50%;
+  .ball{ position:absolute; width:46px; height:46px; border-radius:50%;
     background:radial-gradient(circle at 30% 30%, #fff 0 60%, #e9e9e9 61% 100%);
-    box-shadow: inset 0 0 0 2px #111, 0 12px 18px rgba(0,0,0,.45);
-    display:flex; align-items:center; justify-content:center; left:40px; top:calc(50% - 23px);
+    box-shadow:inset 0 0 0 2px #111, 0 12px 18px rgba(0,0,0,.45);
+    display:flex; align-items:center; justify-content:center; left:40px; top:40px;
     cursor:grab; user-select:none; touch-action:none; font-size:22px;
   }
-  .ball:active{ cursor:grabbing; }
+  .aim{ position:absolute; pointer-events:none; display:none }
+  .aim .line{ height:3px; background:var(--accent); transform-origin:left center; box-shadow:0 0 8px rgba(37,99,235,.6) }
+  .aim .dot{ width:10px; height:10px; border:2px solid var(--accent); border-radius:50%; background:transparent; position:absolute; transform:translate(-50%,-50%) }
 
-  .aim{ position:absolute; pointer-events:none; display:none; }
-  .aim .line{ height:3px; background:var(--accent); transform-origin:left center; box-shadow:0 0 8px rgba(37,99,235,.6); }
-  .aim .dot{ width:10px; height:10px; border:2px solid var(--accent); border-radius:50%; background:transparent; position:absolute; transform:translate(-50%,-50%); }
+  .overlay{ position:absolute; inset:0; display:none; align-items:center; justify-content:center; z-index:4; background:linear-gradient(180deg, rgba(0,0,0,.0), rgba(0,0,0,.55) 40%, rgba(0,0,0,.6)); text-align:center; padding:20px }
+  .overlay .panel{ background:var(--card); border:1px solid var(--border); padding:16px; border-radius:12px; max-width:680px; color:var(--ink) }
+  .overlay .big{ font-size:26px; font-weight:900; margin-bottom:6px }
+  .overlay .big.good{ color:var(--good) } .overlay .big.bad{ color:var(--bad) }
 
-  .pulse{ box-shadow: 0 0 0 0 rgba(37,99,235,0.8), inset 0 0 0 2px #111, 0 12px 18px rgba(0,0,0,.45); animation: pulse 1.2s ease-out 2; }
-  @keyframes pulse{ 0%{ box-shadow: 0 0 0 0 rgba(37,99,235,0.8), inset 0 0 0 2px #111, 0 12px 18px rgba(0,0,0,.45);} 100%{ box-shadow: 0 0 0 24px rgba(37,99,235,0);} }
-
-  .overlay{ position:absolute; inset:0; display:none; align-items:center; justify-content:center; z-index:4; background:linear-gradient(180deg, rgba(0,0,0,.0), rgba(0,0,0,.55) 40%, rgba(0,0,0,.6)); text-align:center; padding:20px; }
-  .overlay .panel{ background:var(--card); border:1px solid var(--border); padding:16px; border-radius:12px; max-width:680px; color:var(--ink); }
-  .overlay h3{ margin:0 0 8px 0 }
-  .overlay .explain{ color:var(--muted); }
-  .overlay .big{ font-size:26px; font-weight:900; margin-bottom:6px; }
-  .overlay .big.good{ color:var(--good) }
-  .overlay .big.bad{ color:var(--bad) }
-
-  .progress-dots{ display:flex; gap:6px; flex-wrap:wrap; }
-  .progress-dots .dot{ width:10px; height:10px; border-radius:50%; background:#dbeafe; border:1px solid var(--border); }
-  body.theme-night .progress-dots .dot{ background:#23344d; }
-  .progress-dots .dot.done{ background:var(--accent-2) }
-  .progress-dots .dot.current{ background:var(--accent) }
+  .progress-dots{ display:flex; gap:6px; flex-wrap:wrap }
+  .progress-dots .dot{ width:10px; height:10px; border-radius:50%; background:#dbeafe; border:1px solid var(--border) }
+  body.theme-night .progress-dots .dot{ background:#23344d }
+  .progress-dots .dot.done{ background:var(--accent-2) } .progress-dots .dot.current{ background:var(--accent) }
 
   .tiny{ font-size:12px; color:var(--muted) }
-  @media (max-width: 840px){
-    .options{ grid-template-columns:1fr }
-    .goal-grid{ width:52% }
-    .kick-line{ left:90px }
-  }
+  @media (max-width:840px){ .options{ grid-template-columns:1fr } .goal-grid{ width:52% } .kick-line{ left:90px } }
 
-  /* START OVERLAY */
-  .start-overlay{
-    position:fixed; inset:0;
-    background: radial-gradient(1200px 600px at 20% -10%, rgba(37,99,235,.10), transparent 60%),
-                radial-gradient(1200px 600px at 120% 110%, rgba(34,197,94,.10), transparent 60%),
-                var(--bg);
-    display:flex; align-items:center; justify-content:center; z-index:200; padding:20px;
-  }
-  .start-panel{ background:var(--card); border:1px solid var(--border); border-radius:16px; width:min(760px, 96vw); padding:18px; box-shadow:0 20px 60px rgba(0,0,0,.10); }
-  .start-title{ margin:0 0 6px 0; font-size:clamp(22px, 3.4vw, 30px); display:flex; align-items:center; gap:8px; }
+  /* ---- START OVERLAY ---- */
+  .start-overlay{ position:fixed; inset:0; background:radial-gradient(1200px 600px at 20% -10%, rgba(37,99,235,.10), transparent 60%), radial-gradient(1200px 600px at 120% 110%, rgba(34,197,94,.10), transparent 60%), var(--bg); display:flex; align-items:center; justify-content:center; z-index:200; padding:20px }
+  .start-panel{ background:var(--card); border:1px solid var(--border); border-radius:16px; width:min(760px,96vw); padding:18px; box-shadow:0 20px 60px rgba(0,0,0,.10) }
+  .start-title{ margin:0 0 6px 0; font-size:clamp(22px,3.4vw,30px); display:flex; align-items:center; gap:8px }
   .start-sub{ margin:0 0 10px 0; color:var(--muted) }
   .start-controls{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-top:12px }
-  .start-controls .left{ display:flex; gap:10px; align-items:center; flex-wrap:wrap }
-  .start-controls select{ background:var(--card); color:var(--ink); border:1px solid var(--border); padding:8px 10px; border-radius:10px; font-weight:700; }
-  .start-btn{ background:linear-gradient(135deg, var(--accent-2), var(--accent)); color:#061a12; border:none; padding:12px 18px; border-radius:12px; font-weight:900; cursor:pointer; }
+  .start-controls select{ background:var(--card); color:var(--ink); border:1px solid var(--border); padding:8px 10px; border-radius:10px; font-weight:700 }
+  .start-btn{ background:linear-gradient(135deg, var(--accent-2), var(--accent)); color:#061a12; border:none; padding:12px 18px; border-radius:12px; font-weight:900; cursor:pointer }
 </style>
 </head>
 <body class="theme-day">
@@ -189,14 +126,9 @@
   <div class="start-overlay" id="startOverlay" role="dialog" aria-modal="true">
     <div class="start-panel">
       <h2 class="start-title">⚽ SOCCER Rules Shootout</h2>
-      <p class="start-sub">Read the question first. Then <b>scroll down</b> and kick the ball at A/B/C/D to answer. Kids Mode is on by default. No auto-shoot—your feet, your goal.</p>
-      <div class="legend">
-        <div class="chip">Rule Sets: S • O • C • C • E • R</div>
-        <div class="chip">Touch‑friendly for iPhone/iPad</div>
-        <div class="chip">No internet required</div>
-      </div>
+      <p class="start-sub">Read the question first. Then <b>scroll down</b> and kick the ball at A/B/C/D to answer. Kids Mode is on by default. No auto‑shoot.</p>
       <div class="start-controls">
-        <div class="left">
+        <div style="display:flex; gap:10px; align-items:center">
           <label class="tiny" for="themeSelectStart">Theme</label>
           <select id="themeSelectStart" aria-label="Theme at start">
             <option value="day" selected>Day</option>
@@ -218,20 +150,18 @@
       </div>
       <div class="question" id="question" aria-live="polite">—</div>
       <div class="options" id="options"></div>
-      <div class="footer-bar" style="margin-top:12px">
-        <div class="left legend">
-          <div class="chip">Read first</div>
-          <div class="chip">Then scroll down and kick at A/B/C/D</div>
-        </div>
+      <div class="legend" style="margin-top:10px">
+        <div class="chip">Read first</div>
+        <div class="chip">Then scroll down and kick at A/B/C/D</div>
       </div>
     </div>
 
-    <!-- ARENA (ALWAYS BELOW) -->
+    <!-- FIELD -->
     <div class="arena card" id="arena">
       <div class="kick-line"></div>
       <div class="center-circle"></div>
 
-      <div class="goal-grid" id="goalGrid">
+      <div class="goal-grid">
         <div class="goal" data-letter="A"><div>A</div><div class="label">Shoot at A</div></div>
         <div class="goal" data-letter="B"><div>B</div><div class="label">Shoot at B</div></div>
         <div class="goal" data-letter="C"><div>C</div><div class="label">Shoot at C</div></div>
@@ -249,7 +179,7 @@
         <div class="panel">
           <div class="big" id="overlayTitle">Nice Shot!</div>
           <h3 id="overlayPrompt">—</h3>
-          <p class="explain" id="overlayExplain">—</p>
+          <p class="tiny" id="overlayExplain">—</p>
           <div style="margin-top:10px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap">
             <button id="nextBtn" class="start-btn">Next Question ▶</button>
             <button id="retryBtn">Replay Shot</button>
@@ -272,7 +202,18 @@
   </div>
 
 <script>
-/* ============ Content (same questions) ============ */
+/* =======================
+   TUNING (adjust if you like)
+   ======================= */
+const BALL_R = 23;           // radius in px
+const FRICTION = 0.985;      // 0.97–0.99; lower = stops faster
+const BOUNCE = 0.38;         // 0.2–0.5; lower = softer bounce
+const MAX_V = 32;            // cap speed so it’s not bonkers
+const POWER_BASE = 0.18;     // base power multiplier
+const POWER_MIN = 0.13;
+const POWER_MAX = 0.22;
+
+/* ----------------- Content ----------------- */
 const QUESTION_SETS = [
   { code:'S', name:'Stay in Your Role', blurb:"Stick to your assigned spot. Players play, coaches coach, refs ref.", questions:[
     { stem:"You’re playing <b>defender</b>. Our striker is dribbling toward their goal. What should you do?",
@@ -397,17 +338,20 @@ const bestEl = document.getElementById('best');
 const heartsEl = document.getElementById('hearts');
 const breadcrumbsEl = document.getElementById('breadcrumbs');
 const progressDots = document.getElementById('progressDots');
+
 const arena = document.getElementById('arena');
 const ball = document.getElementById('ball');
+const aim = document.getElementById('aim');
+const aimLine = document.getElementById('aimLine');
+const aimDot = document.getElementById('aimDot');
+
 const overlay = document.getElementById('overlay');
 const overlayTitle = document.getElementById('overlayTitle');
 const overlayPrompt = document.getElementById('overlayPrompt');
 const overlayExplain = document.getElementById('overlayExplain');
 const nextBtn = document.getElementById('nextBtn');
 const retryBtn = document.getElementById('retryBtn');
-const aim = document.getElementById('aim');
-const aimLine = document.getElementById('aimLine');
-const aimDot = document.getElementById('aimDot');
+
 const startOverlay = document.getElementById('startOverlay');
 const startBtn = document.getElementById('startBtn');
 const themeSelect = document.getElementById('themeSelect');
@@ -416,7 +360,8 @@ const themeSelectStart = document.getElementById('themeSelectStart');
 /* ============ State ============ */
 let state = {
   setIndex:0, qIndex:0, score:0, hearts:3, answered:false,
-  vx:0, vy:0, raf:0, dragging:false, pointerId:null, dragStart:null, lastTS:0
+  vx:0, vy:0, raf:0, dragging:false, pointerId:null, dragStart:null, lastTS:0,
+  ballX:40, ballY:40
 };
 
 /* ============ Helpers ============ */
@@ -439,7 +384,6 @@ function applyTheme(val){
 themeSelect.addEventListener('change',(e)=> applyTheme(e.target.value));
 themeSelectStart.addEventListener('change',(e)=> applyTheme(e.target.value));
 
-/* ============ Game Flow ============ */
 function currentSet(){ return QUESTION_SETS[state.setIndex]; }
 function currentQ(){ return currentSet().questions[state.qIndex]; }
 
@@ -451,21 +395,20 @@ function loadCurrent(){
   qNum.textContent = state.qIndex+1;
   questionEl.innerHTML = q.stem;
   buildProgress();
-  breadcrumbsEl.innerHTML = `<b>${set.code}</b> ${set.name} &nbsp;•&nbsp; ${set.blurb}`;
+  breadcrumbsEl.innerHTML = `<b>${set.code}</b> ${set.name} • ${set.blurb}`;
 
-  // Show options as text only (NO auto-shoot).
+  // options text only (no auto-shoot)
   const letters = ['A','B','C','D'];
   optionsEl.innerHTML='';
   q.options.forEach((txt, i)=>{
-    const div = document.createElement('div'); div.className='opt';
+    const row = document.createElement('div'); row.className='opt';
     const badge = document.createElement('div'); badge.className='badge'; badge.textContent=letters[i];
     const span = document.createElement('div'); span.innerHTML = txt;
-    div.appendChild(badge); div.appendChild(span);
-    optionsEl.appendChild(div);
+    row.appendChild(badge); row.appendChild(span);
+    optionsEl.appendChild(row);
   });
 
-  resetBall();
-  // Nudge attention back to the question first
+  resetBall(true);
   document.querySelector('.question').scrollIntoView({behavior:'smooth', block:'center'});
 }
 
@@ -474,139 +417,146 @@ function nextQuestion(){
   if(state.qIndex>=5){
     state.qIndex=0; state.setIndex++;
     if(state.setIndex>=QUESTION_SETS.length){
-      const best = getBest();
-      if(state.score>best){ setBest(state.score); }
-      bestEl.textContent = getBest();
-      alert(`Full-Time! 🚨\nYou finished all SOCCER rules.\nFinal Score: ${state.score}\nBest (this browser): ${getBest()}\n\nTip: Replay to beat your best!`);
+      const best = getBest(); if(state.score>best){ setBest(state.score); }
+      alert(`Full-Time! 🚨\nFinal Score: ${state.score}\nBest (this browser): ${getBest()}\n\nReplay to beat your best!`);
       state.setIndex=0; state.qIndex=0; state.score=0; state.hearts=3;
     }
   }
   loadCurrent();
 }
 
-/* ============ Physics & Pointer Handling ============ */
-// Sensitivity auto-scales with field width for consistent feel across phones/tablets.
-function kickScale(){
-  // Arena width ~1000px → ~0.18 scaling; clamp for sanity.
-  const s = arena.getBoundingClientRect().width / 1000;
-  return Math.max(0.13, Math.min(0.22, 0.18 * s));
+/* ============ Field Geometry ============ */
+function bounds(){
+  const a = arena.getBoundingClientRect();
+  const pad = 12;
+  const bw = 46, bh = 46;
+  return {
+    minX: pad, maxX: a.width - pad - bw,
+    minY: pad, maxY: a.height - pad - bh,
+    w: a.width, h: a.height
+  };
 }
-function resetBall(){
+function centerBallXY(){ return {cx: state.ballX + BALL_R, cy: state.ballY + BALL_R}; }
+function setBall(x,y){
+  state.ballX = x; state.ballY = y;
+  ball.style.left = x + 'px';
+  ball.style.top  = y + 'px';
+}
+function resetBall(center=false){
   cancelAnimationFrame(state.raf);
-  state.vx=0; state.vy=0;
-  ball.style.left = '40px';
-  ball.style.top  = `calc(50% - 23px)`;
+  state.vx=0; state.vy=0; state.answered=false;
+  const b = bounds();
+  const startX = 40;
+  const startY = center ? (b.h/2 - BALL_R) : Math.min(Math.max(state.ballY, b.minY), b.maxY);
+  setBall(startX, startY);
   aim.style.display='none';
-  state.answered=false;
 }
-function getPointInArena(e){
+
+/* ============ Kicking (Pointer Events) ============ */
+function powerScale(){
+  // scale with field width so phones/tablets feel similar
+  const s = bounds().w / 1000;
+  return Math.max(POWER_MIN, Math.min(POWER_MAX, POWER_BASE * s));
+}
+function pointInArena(e){
   const a = arena.getBoundingClientRect();
   return { x: e.clientX - a.left, y: e.clientY - a.top };
 }
 
 ball.addEventListener('pointerdown', (e)=>{
   e.preventDefault();
-  // Ensure we only start from the ball itself
   state.dragging = true;
   state.pointerId = e.pointerId;
   ball.setPointerCapture(e.pointerId);
 
-  // Start from the ball's center for clean slingshot math
-  const b = ball.getBoundingClientRect(), a = arena.getBoundingClientRect();
-  const start = { x: b.left - a.left + b.width/2, y: b.top - a.top + b.height/2 };
-  state.dragStart = start;
+  // Start from ball center to make the slingshot feel natural
+  const {cx, cy} = centerBallXY();
+  state.dragStart = { x: cx, y: cy };
 
   // Show aim helper
   aim.style.display='block';
-  aimDot.style.left = `${start.x}px`; aimDot.style.top = `${start.y}px`;
-  aimLine.style.position='absolute';
-  aimLine.style.left = `${start.x}px`; aimLine.style.top = `${start.y}px`;
+  aimDot.style.left = `${cx}px`; aimDot.style.top = `${cy}px`;
+  aimLine.style.position='absolute'; aimLine.style.left = `${cx}px`; aimLine.style.top = `${cy}px`;
   aimLine.style.width = '0px'; aimLine.style.height = '3px';
 
-  // pause motion while aiming
+  // Pause motion while aiming
   state.vx = state.vy = 0;
   cancelAnimationFrame(state.raf);
 });
-
 ball.addEventListener('pointermove', (e)=>{
   if(!state.dragging || e.pointerId !== state.pointerId) return;
   e.preventDefault();
-  const pt = getPointInArena(e);
+  const pt = pointInArena(e);
   const dx = state.dragStart.x - pt.x;
   const dy = state.dragStart.y - pt.y;
-  const power = Math.max(0, Math.min(120, Math.hypot(dx,dy)/2.6)); // longer line = more power
+  const raw = Math.hypot(dx,dy);
+  // Mild easing so short pulls still kick
+  const power = Math.min(140, raw * 0.6);
   const angle = Math.atan2(dy, dx);
   aimLine.style.display='block';
   aimLine.style.width = `${power}px`;
   aimLine.style.transform = `rotate(${angle}rad)`;
 });
-
-ball.addEventListener('pointerup', (e)=>{
+function endKick(e){
   if(!state.dragging || e.pointerId !== state.pointerId) return;
   e.preventDefault();
   state.dragging = false;
   aim.style.display='none';
 
-  const pt = getPointInArena(e);
+  const pt = pointInArena(e);
   const dx = (state.dragStart.x - pt.x);
   const dy = (state.dragStart.y - pt.y);
-  const s = kickScale();
-  // Velocity with caps for sanity across devices
-  const maxV = 32;
-  state.vx = Math.max(-maxV, Math.min(maxV, dx * s));
-  state.vy = Math.max(-maxV, Math.min(maxV, dy * s));
-  // Haptic tap on shot, if supported
+  const s = powerScale();
+  state.vx = Math.max(-MAX_V, Math.min(MAX_V, dx * s));
+  state.vy = Math.max(-MAX_V, Math.min(MAX_V, dy * s));
   if (navigator.vibrate) { navigator.vibrate(15); }
 
   cancelAnimationFrame(state.raf);
+  state.lastTS = 0;
   state.raf = requestAnimationFrame(step);
-});
+}
+ball.addEventListener('pointerup', endKick);
+ball.addEventListener('pointercancel', endKick);
+ball.addEventListener('lostpointercapture', endKick);
 
-/* Animation loop */
+/* ============ Animation & Collisions ============ */
 function step(ts){
   state.raf = requestAnimationFrame(step);
-  const dt = Math.max(0.2, Math.min(2.5, (ts - (state.lastTS||ts)) / 16.67));
+  const dt = Math.max(0.2, Math.min(2.0, (ts - (state.lastTS||ts)) / 16.67));
   state.lastTS = ts;
 
-  // Current left/top in px
-  let x = parseFloat(ball.style.left);
-  let y = parseFloat(ball.style.top);
-  // Centers (before move)
-  let prevCx = x + 23, prevCy = y + 23;
+  const b = bounds();
+  // previous center
+  const prev = centerBallXY();
 
-  // Integrate
-  x += state.vx * dt; y += state.vy * dt;
+  // integrate
+  let x = state.ballX + state.vx * dt;
+  let y = state.ballY + state.vy * dt;
 
-  // Friction
-  state.vx *= 0.985;
-  state.vy *= 0.985;
+  // walls/bounce
+  if(x < b.minX){ x=b.minX; state.vx = -state.vx * BOUNCE; }
+  if(x > b.maxX){ x=b.maxX; state.vx = -state.vx * BOUNCE; }
+  if(y < b.minY){ y=b.minY; state.vy = -state.vy * BOUNCE; }
+  if(y > b.maxY){ y=b.maxY; state.vy = -state.vy * BOUNCE; }
 
-  // Bounds/bounce
-  const a = arena.getBoundingClientRect();
-  const bw = 46, bh = 46, pad = 12;
-  const minX = pad, maxX = a.width - pad - bw;
-  const minY = pad, maxY = a.height - pad - bh;
-  if(x<minX){ x=minX; state.vx = -state.vx*0.38; }
-  if(x>maxX){ x=maxX; state.vx = -state.vx*0.38; }
-  if(y<minY){ y=minY; state.vy = -state.vy*0.38; }
-  if(y>maxY){ y=maxY; state.vy = -state.vy*0.38; }
+  setBall(x,y);
 
-  ball.style.left = x + 'px';
-  ball.style.top  = y + 'px';
+  // friction
+  state.vx *= FRICTION; state.vy *= FRICTION;
 
-  // Centers (after move)
-  const cx = x + 23, cy = y + 23;
+  // check goals (segment-through-rect + expanded hitbox)
+  const now = centerBallXY();
+  if(checkGoalHit(prev.cx, prev.cy, now.cx, now.cy)){
+    cancelAnimationFrame(state.raf);
+  }
 
-  checkGoalHit(prevCx, prevCy, cx, cy);
-
-  // Stop when basically still
+  // stop when slow
   if(Math.hypot(state.vx, state.vy) < 0.18){
     state.vx = state.vy = 0;
     cancelAnimationFrame(state.raf);
   }
 }
 
-/* Robust goal detection: segment-through-rect + expanded hitbox */
 function pointInRect(px,py,r){ return px>=r.left && px<=r.right && py>=r.top && py<=r.bottom; }
 function onSeg(ax,ay,bx,by,cx,cy){ return Math.min(ax,bx)-1e-6<=cx && cx<=Math.max(ax,bx)+1e-6 && Math.min(ay,by)-1e-6<=cy && cy<=Math.max(ay,by)+1e-6; }
 function orient(ax,ay,bx,by,cx,cy){ const v=(by-ay)*(cx-bx)-(bx-ax)*(cy-by); return Math.abs(v)<1e-6?0:(v>0?1:2); }
@@ -626,25 +576,25 @@ function segIntersectsRect(x1,y1,x2,y2,r){
          segsIntersect(x1,y1,x2,y2, r.right,r.bottom, r.left,r.bottom) ||
          segsIntersect(x1,y1,x2,y2, r.left,r.bottom, r.left,r.top);
 }
-function rectArena(el){
+function rectRelativeToArena(el){
   const ar = arena.getBoundingClientRect();
   const r = el.getBoundingClientRect();
   return { left: r.left - ar.left, top: r.top - ar.top, right: r.right - ar.left, bottom: r.bottom - ar.top };
 }
-function expandRect(r, pad){
-  return { left:r.left-pad, top:r.top-pad, right:r.right+pad, bottom:r.bottom+pad };
-}
-function checkGoalHit(prevCx, prevCy, cx, cy){
-  if(state.answered) return;
-  const goals = document.querySelectorAll('.goal');
+function expandRect(r, pad){ return { left:r.left-pad, top:r.top-pad, right:r.right+pad, bottom:r.bottom+pad }; }
+
+function checkGoalHit(px,py,cx,cy){
+  if(state.answered) return false;
+  const goals = arena.querySelectorAll('.goal');
   for(const g of goals){
-    const base = rectArena(g);
-    const r = expandRect(base, 23); // expand by ball radius so grazes count
-    if( segIntersectsRect(prevCx, prevCy, cx, cy, r) ){
+    const base = rectRelativeToArena(g);
+    const r = expandRect(base, BALL_R); // let grazes count
+    if(segIntersectsRect(px,py,cx,cy,r)){
       handleAnswer(g.getAttribute('data-letter'));
-      break;
+      return true;
     }
   }
+  return false;
 }
 
 /* ============ Answer/Overlay/Score ============ */
@@ -658,12 +608,10 @@ function showOverlay(isCorrect, explain){
 }
 function handleAnswer(letter){
   state.answered = true;
-  cancelAnimationFrame(state.raf);
   const map = {A:0,B:1,C:2,D:3};
   const pick = map[letter];
   const q = currentQ();
-  const correctIndex = q.correct;
-  const isCorrect = pick === correctIndex;
+  const isCorrect = pick === q.correct;
   if(isCorrect){
     state.score += 2; scoreEl.textContent = state.score;
     const best = getBest(); if(state.score > best){ setBest(state.score); bestEl.textContent = state.score; }
@@ -676,11 +624,11 @@ function handleAnswer(letter){
     setTimeout(()=>{
       alert('Out of hearts! Resetting this rule set.');
       state.hearts = 3; heartsEl.textContent='3'; state.qIndex = 0; loadCurrent();
-    }, 100);
+    }, 80);
   }
 }
 nextBtn.addEventListener('click', ()=>{ overlay.style.display='none'; nextQuestion(); });
-retryBtn.addEventListener('click', ()=>{ overlay.style.display='none'; resetBall(); arena.scrollIntoView({behavior:'smooth', block:'center'}); });
+retryBtn.addEventListener('click', ()=>{ overlay.style.display='none'; resetBall(false); arena.scrollIntoView({behavior:'smooth', block:'center'}); });
 
 /* ============ Start + Init ============ */
 startBtn.addEventListener('click', ()=>{
@@ -689,7 +637,12 @@ startBtn.addEventListener('click', ()=>{
   document.querySelector('.question').scrollIntoView({behavior:'smooth', block:'center'});
 });
 bestEl.textContent = getBest();
-(function init(){ loadCurrent(); applyTheme(getTheme()); })();
+(function init(){
+  applyTheme(getTheme());
+  loadCurrent();
+  // keep ball centered vertically if the field resizes
+  window.addEventListener('resize', ()=> resetBall(true));
+})();
 </script>
 </body>
 </html>
