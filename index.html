@@ -1045,9 +1045,9 @@
             zones.forEach((zone, i) => {
                 const zoneDiv = document.createElement('div');
                 zoneDiv.style.position = 'absolute';
-                zoneDiv.style.left = (i * 33) + '%';
+                zoneDiv.style.left = (i * 33.33) + '%';
                 zoneDiv.style.top = '0';
-                zoneDiv.style.width = '33%';
+                zoneDiv.style.width = '33.33%';
                 zoneDiv.style.height = '100%';
                 zoneDiv.style.borderRight = i < 2 ? '2px dashed white' : 'none';
                 zoneDiv.style.background = i === 1 ? 'rgba(66, 153, 225, 0.3)' : 'rgba(255, 0, 0, 0.15)';
@@ -1069,10 +1069,12 @@
             const player = document.createElement('div');
             player.className = 'character';
             player.textContent = '🧑‍⚽';
+            player.style.position = 'absolute';
             player.style.left = playerX + '%';
             player.style.bottom = '20px';
             player.style.fontSize = '2.5em';
             player.style.transform = 'translateX(-50%)';
+            player.style.zIndex = '10';
             field.appendChild(player);
             
             // Controls
@@ -1089,6 +1091,7 @@
             leftBtn.style.border = 'none';
             leftBtn.style.borderRadius = '10px';
             leftBtn.style.fontWeight = 'bold';
+            leftBtn.style.zIndex = '20';
             
             const rightBtn = document.createElement('button');
             rightBtn.className = 'touch-target';
@@ -1103,17 +1106,16 @@
             rightBtn.style.border = 'none';
             rightBtn.style.borderRadius = '10px';
             rightBtn.style.fontWeight = 'bold';
+            rightBtn.style.zIndex = '20';
             
             addTapHandler(leftBtn, (e) => {
                 playerX = Math.max(10, playerX - 15);
                 player.style.left = playerX + '%';
-                createTouchFeedback(e.pageX || 50, e.pageY || 50, document.body);
             });
             
             addTapHandler(rightBtn, (e) => {
                 playerX = Math.min(90, playerX + 15);
                 player.style.left = playerX + '%';
-                createTouchFeedback(e.pageX || 50, e.pageY || 50, document.body);
             });
             
             field.appendChild(leftBtn);
@@ -1124,26 +1126,35 @@
                 const ball = document.createElement('div');
                 ball.className = 'character';
                 ball.textContent = '⚽';
+                ball.style.position = 'absolute';
                 ball.style.left = (10 + Math.random() * 80) + '%';
-                ball.style.top = '0';
+                ball.style.top = '-40px';
                 ball.style.fontSize = '2em';
-                ball.style.transition = 'top 2s linear';
+                ball.style.zIndex = '5';
                 field.appendChild(ball);
                 
-                setTimeout(() => {
-                    ball.style.top = '100%';
-                }, 100);
+                let ballY = -40;
+                const ballX = parseFloat(ball.style.left);
+                let caught = false;
                 
-                const checkCatch = setInterval(() => {
-                    const ballX = parseFloat(ball.style.left);
-                    const ballY = parseFloat(ball.style.top);
+                const fallInterval = setInterval(() => {
+                    ballY += 5;
+                    ball.style.top = ballY + 'px';
                     
-                    if (ballY > 75 && ballY < 90) {
-                        if (Math.abs(ballX - playerX) < 10) {
-                            clearInterval(checkCatch);
+                    // Get field height
+                    const fieldHeight = field.offsetHeight;
+                    const playerBottom = 60; // Player is 60px from bottom
+                    
+                    // Check if ball is at player level
+                    if (ballY > fieldHeight - playerBottom - 40 && ballY < fieldHeight - playerBottom && !caught) {
+                        // Check horizontal collision
+                        if (Math.abs(ballX - playerX) < 12) {
+                            caught = true;
                             ball.remove();
+                            clearInterval(fallInterval);
                             
-                            if (playerX > 33 && playerX < 66) {
+                            // Check which zone the player is in
+                            if (playerX > 33.33 && playerX < 66.66) {
                                 collected++;
                                 score += 2;
                                 document.getElementById('minigameScore').textContent = score;
@@ -1165,6 +1176,7 @@
                                 msg.style.bottom = '100px';
                                 msg.style.color = 'red';
                                 msg.style.fontWeight = 'bold';
+                                msg.style.fontSize = '1.2em';
                                 msg.style.transform = 'translateX(-50%)';
                                 field.appendChild(msg);
                                 setTimeout(() => msg.remove(), 1000);
@@ -1172,18 +1184,20 @@
                         }
                     }
                     
-                    if (ballY >= 95) {
-                        clearInterval(checkCatch);
+                    // Remove ball if it goes off screen
+                    if (ballY > fieldHeight) {
                         ball.remove();
+                        clearInterval(fallInterval);
                     }
-                }, 50);
+                }, 30);
             }
             
-            const ballInterval = setInterval(createBall, 1500);
+            // Create balls more frequently for better gameplay
+            const ballInterval = setInterval(createBall, 1200);
             
             setTimeout(() => {
                 clearInterval(ballInterval);
-                showMinigameComplete(`Collected ${collected} in your zone! ${wrongZone === 0 ? 'Perfect positioning!' : 'Remember: Stay in your zone!'}`);
+                showMinigameComplete(`Collected ${collected} in your zone! ${wrongZone === 0 && collected > 0 ? 'Perfect positioning!' : wrongZone > collected ? 'Stay in the blue zone!' : 'Good job staying in position!'}`);
             }, 10000);
         }
 
@@ -1659,29 +1673,44 @@
                 const container = document.createElement('div');
                 container.style.position = 'absolute';
                 container.style.left = (10 + Math.random() * 70) + '%';
-                container.style.top = (10 + Math.random() * 60) + '%';
+                container.style.top = (10 + Math.random() * 50) + '%';
                 container.style.textAlign = 'center';
                 container.style.cursor = 'pointer';
+                container.style.padding = '10px';
+                container.style.minWidth = '100px';
+                container.style.transform = 'translateX(-50%)';
                 
                 const player = document.createElement('div');
                 player.className = 'character';
                 player.textContent = mistake.emoji;
-                player.style.fontSize = '3em';
+                player.style.fontSize = '3.5em';
+                player.style.marginBottom = '10px';
+                player.style.display = 'block';
+                player.style.height = '80px';
+                player.style.lineHeight = '80px';
                 container.appendChild(player);
                 
                 const text = document.createElement('div');
                 text.style.color = 'white';
                 text.style.fontWeight = 'bold';
-                text.style.marginTop = '5px';
-                text.style.fontSize = '0.9em';
+                text.style.fontSize = '1em';
+                text.style.background = 'rgba(0, 0, 0, 0.5)';
+                text.style.padding = '5px 10px';
+                text.style.borderRadius = '5px';
+                text.style.display = 'inline-block';
                 text.textContent = mistake.text;
                 container.appendChild(text);
+                
+                // Pulse animation to draw attention
+                container.style.animation = 'pulse 1s infinite';
                 
                 addTapHandler(container, (e) => {
                     createTouchFeedback(e.pageX || 50, e.pageY || 50, document.body);
                     
+                    container.style.animation = 'none';
                     player.textContent = '😊';
                     text.textContent = 'Thanks!';
+                    text.style.background = 'rgba(16, 185, 129, 0.7)';
                     encouraged++;
                     score += 3;
                     document.getElementById('minigameScore').textContent = score;
@@ -1698,11 +1727,12 @@
                     msg.textContent = encouragements[Math.floor(Math.random() * encouragements.length)];
                     msg.className = 'combo-text';
                     msg.style.left = container.style.left;
-                    msg.style.top = container.style.top;
+                    msg.style.top = (parseFloat(container.style.top) - 10) + '%';
                     field.appendChild(msg);
                     setTimeout(() => msg.remove(), 1500);
                     
                     container.style.pointerEvents = 'none';
+                    setTimeout(() => container.remove(), 800);
                 });
                 
                 field.appendChild(container);
@@ -1710,13 +1740,20 @@
                 setTimeout(() => {
                     if (player.textContent !== '😊') {
                         missed++;
+                        container.style.animation = 'shake 0.5s';
+                        
                         const missMsg = document.createElement('div');
-                        missMsg.textContent = '❌ Teammate needed support!';
+                        missMsg.textContent = '❌ Teammate left sad!';
                         missMsg.style.position = 'absolute';
                         missMsg.style.left = container.style.left;
                         missMsg.style.top = container.style.top;
-                        missMsg.style.color = 'red';
+                        missMsg.style.color = '#ff6b6b';
                         missMsg.style.fontWeight = 'bold';
+                        missMsg.style.fontSize = '1.1em';
+                        missMsg.style.background = 'rgba(0, 0, 0, 0.7)';
+                        missMsg.style.padding = '5px 10px';
+                        missMsg.style.borderRadius = '5px';
+                        missMsg.style.transform = 'translateX(-50%)';
                         field.appendChild(missMsg);
                         setTimeout(() => missMsg.remove(), 1000);
                     }
@@ -1724,12 +1761,30 @@
                 }, 3000);
             }
             
-            const playerInterval = setInterval(createUpsetPlayer, 1800);
+            // Create initial instruction
+            const instruction = document.createElement('div');
+            instruction.style.position = 'absolute';
+            instruction.style.top = '5px';
+            instruction.style.width = '100%';
+            instruction.style.textAlign = 'center';
+            instruction.style.color = 'white';
+            instruction.style.fontWeight = 'bold';
+            instruction.style.fontSize = '1.1em';
+            instruction.style.background = 'rgba(0, 0, 0, 0.3)';
+            instruction.style.padding = '5px';
+            instruction.textContent = 'TAP sad teammates to encourage them!';
+            field.appendChild(instruction);
             
+            // Start creating upset players after a short delay
             setTimeout(() => {
-                clearInterval(playerInterval);
-                showMinigameComplete(`Encouraged ${encouraged} teammates! ${missed === 0 ? 'Amazing team spirit!' : 'Remember: Always support your team!'}`);
-            }, 10000);
+                createUpsetPlayer();
+                const playerInterval = setInterval(createUpsetPlayer, 1800);
+                
+                setTimeout(() => {
+                    clearInterval(playerInterval);
+                    showMinigameComplete(`Encouraged ${encouraged} teammates! ${missed === 0 && encouraged > 0 ? 'Amazing team spirit!' : missed > encouraged ? 'Try to encourage more teammates!' : 'Good job supporting your team!'}`);
+                }, 9000);
+            }, 500);
         }
 
         // NEW: Respect Rally Game (R - Respect)
