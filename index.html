@@ -1,648 +1,1959 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>⚽ SOCCER Rules Shootout — Question First → Scroll Down to Kick (No Auto‑Shoot, Stable Physics)</title>
-<style>
-  /* ---- THEME VARS ---- */
-  :root{
-    --bg:#f6f7fb; --ink:#0f172a; --muted:#475569; --card:#ffffff; --border:rgba(15,23,42,.08);
-    --accent:#2563eb; --accent-2:#22c55e; --good:#16a34a; --bad:#ef4444;
-    --chip:#eef2ff; --chip-border:rgba(2,6,23,.08);
-    --pitch:#6ebd8a; --pitch-dark:#59a978; --line:#ffffff;
-  }
-  body.theme-night{
-    --bg:#0f172a; --ink:#e5e7eb; --muted:#93a3b8; --card:#0b1220; --border:rgba(255,255,255,.08);
-    --accent:#60a5fa; --accent-2:#34d399; --good:#22c55e; --bad:#f87171;
-    --chip:#0f172a; --chip-border:rgba(255,255,255,.12);
-    --pitch:#1d6b52; --pitch-dark:#155e46; --line:#eaf2ff;
-  }
-  body.theme-contrast{
-    --bg:#ffffff; --ink:#111111; --muted:#222222; --card:#ffffff; --border:#111;
-    --accent:#0000ff; --accent-2:#008000; --good:#008000; --bad:#ff0000;
-    --chip:#ffffff; --chip-border:#111;
-    --pitch:#1a1a1a; --pitch-dark:#111111; --line:#ffd000;
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
+    <title>SOCCER Stars Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-  /* ---- BASE LAYOUT ---- */
-  *{box-sizing:border-box}
-  html, body{ height:100% }
-  body{
-    margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
-    background:var(--bg); color:var(--ink); display:flex; flex-direction:column; min-height:100vh;
-    -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; -webkit-tap-highlight-color:transparent;
-    overscroll-behavior-y:contain; /* stop rubber-banding while dragging */
-  }
-  header{
-    padding:10px 16px; background:linear-gradient(0deg,rgba(0,0,0,.025),rgba(0,0,0,.025)), var(--card);
-    border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; flex-wrap:wrap;
-  }
-  header h1{ margin:0; font-size:18px; display:flex; align-items:center; gap:8px }
-  header .rule-tag{ padding:4px 10px; border-radius:999px; background:linear-gradient(135deg,var(--accent),#7dd3fc); color:#06121a; font-weight:700 }
-  header .info{ margin-left:auto; display:flex; gap:12px; font-size:14px; opacity:.95 }
-  header select{ background:var(--card); color:var(--ink); border:1px solid var(--border); padding:6px 10px; border-radius:8px; font-weight:600 }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            overflow-x: hidden;
+            touch-action: manipulation;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
 
-  .wrap{ display:grid; grid-template-columns:1fr; gap:12px; padding:12px; max-width:1100px; width:100%; margin:0 auto }
-  .card{ background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px 14px; box-shadow:0 10px 30px rgba(0,0,0,.06) }
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 100vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideIn 0.5s ease-out;
+        }
 
-  /* ---- QUESTION CARD ---- */
-  .qtop{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between; margin-bottom:8px }
-  .qtop .breadcrumbs{ color:var(--muted); font-size:14px }
-  .question{ font-size:clamp(22px, 3.6vw, 30px); line-height:1.45; font-weight:800; letter-spacing:.2px }
-  .options{ margin-top:12px; display:grid; gap:8px; grid-template-columns:1fr 1fr }
-  .opt{ background:linear-gradient(0deg,rgba(0,0,0,.02),rgba(0,0,0,.02)), var(--card); border:1px solid var(--border); border-radius:10px; padding:10px; display:flex; gap:10px; align-items:flex-start; font-size:clamp(16px, 2.4vw, 19px) }
-  .opt .badge{ font-weight:800; width:28px; height:28px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; background:linear-gradient(180deg,#f8fafc,#e2e8f0); color:#0f172a; border:1px solid var(--border); flex:0 0 auto }
-  .legend{ font-size:14px; color:var(--muted); display:flex; flex-wrap:wrap; gap:10px; align-items:center }
-  .legend .chip{ background:var(--chip); border:1px solid var(--chip-border); padding:4px 8px; border-radius:999px }
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 15px;
+                border-radius: 15px;
+                max-height: 100vh;
+            }
+        }
 
-  /* ---- FIELD ---- */
-  .arena{
-    position:relative; width:100%; aspect-ratio:16/9;
-    background:repeating-linear-gradient(90deg,var(--pitch) 0 30px, var(--pitch-dark) 30px 60px);
-    border-radius:12px; border:2px solid var(--border); overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,.08), inset 0 0 0 3px rgba(255,255,255,.05);
-    touch-action:none; /* critical for iOS drag */
-  }
-  @supports not (aspect-ratio:1/1){ .arena{ height:min(64vh, 56.25vw) } }
-  .arena::before{ content:""; position:absolute; inset:12px; border:3px solid var(--line); border-radius:8px; pointer-events:none }
-  .center-circle{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:160px; height:160px; border:3px solid var(--line); border-radius:50%; pointer-events:none; opacity:.7 }
-  .kick-line{ position:absolute; left:110px; top:12px; bottom:12px; width:2px; background:var(--line); opacity:.5; pointer-events:none }
-  .goal-grid{ position:absolute; right:12px; top:12px; bottom:12px; width:48%; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:10px }
-  .goal{ border:5px solid var(--line); border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:42px; color:var(--line); background:rgba(255,255,255,.10); position:relative; user-select:none }
-  .goal .label{ position:absolute; bottom:6px; right:8px; background:rgba(0,0,0,.35); padding:2px 8px; border-radius:999px; font-size:12px; font-weight:700; letter-spacing:.4px }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-  .ball{ position:absolute; width:46px; height:46px; border-radius:50%;
-    background:radial-gradient(circle at 30% 30%, #fff 0 60%, #e9e9e9 61% 100%);
-    box-shadow:inset 0 0 0 2px #111, 0 12px 18px rgba(0,0,0,.45);
-    display:flex; align-items:center; justify-content:center; left:40px; top:40px;
-    cursor:grab; user-select:none; touch-action:none; font-size:22px;
-  }
-  .aim{ position:absolute; pointer-events:none; display:none }
-  .aim .line{ height:3px; background:var(--accent); transform-origin:left center; box-shadow:0 0 8px rgba(37,99,235,.6) }
-  .aim .dot{ width:10px; height:10px; border:2px solid var(--accent); border-radius:50%; background:transparent; position:absolute; transform:translate(-50%,-50%) }
+        .title {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 2em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            font-weight: bold;
+        }
 
-  .overlay{ position:absolute; inset:0; display:none; align-items:center; justify-content:center; z-index:4; background:linear-gradient(180deg, rgba(0,0,0,.0), rgba(0,0,0,.55) 40%, rgba(0,0,0,.6)); text-align:center; padding:20px }
-  .overlay .panel{ background:var(--card); border:1px solid var(--border); padding:16px; border-radius:12px; max-width:680px; color:var(--ink) }
-  .overlay .big{ font-size:26px; font-weight:900; margin-bottom:6px }
-  .overlay .big.good{ color:var(--good) } .overlay .big.bad{ color:var(--bad) }
+        @media (max-width: 768px) {
+            .title {
+                font-size: 1.5em;
+            }
+        }
 
-  .progress-dots{ display:flex; gap:6px; flex-wrap:wrap }
-  .progress-dots .dot{ width:10px; height:10px; border-radius:50%; background:#dbeafe; border:1px solid var(--border) }
-  body.theme-night .progress-dots .dot{ background:#23344d }
-  .progress-dots .dot.done{ background:var(--accent-2) } .progress-dots .dot.current{ background:var(--accent) }
+        .soccer-ball {
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
 
-  .tiny{ font-size:12px; color:var(--muted) }
-  @media (max-width:840px){ .options{ grid-template-columns:1fr } .goal-grid{ width:52% } .kick-line{ left:90px } }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
 
-  /* ---- START OVERLAY ---- */
-  .start-overlay{ position:fixed; inset:0; background:radial-gradient(1200px 600px at 20% -10%, rgba(37,99,235,.10), transparent 60%), radial-gradient(1200px 600px at 120% 110%, rgba(34,197,94,.10), transparent 60%), var(--bg); display:flex; align-items:center; justify-content:center; z-index:200; padding:20px }
-  .start-panel{ background:var(--card); border:1px solid var(--border); border-radius:16px; width:min(760px,96vw); padding:18px; box-shadow:0 20px 60px rgba(0,0,0,.10) }
-  .start-title{ margin:0 0 6px 0; font-size:clamp(22px,3.4vw,30px); display:flex; align-items:center; gap:8px }
-  .start-sub{ margin:0 0 10px 0; color:var(--muted) }
-  .start-controls{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-top:12px }
-  .start-controls select{ background:var(--card); color:var(--ink); border:1px solid var(--border); padding:8px 10px; border-radius:10px; font-weight:700 }
-  .start-btn{ background:linear-gradient(135deg, var(--accent-2), var(--accent)); color:#061a12; border:none; padding:12px 18px; border-radius:12px; font-weight:900; cursor:pointer }
-</style>
+        .score-bar {
+            background: linear-gradient(90deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1em;
+            font-weight: 600;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .score-bar {
+                font-size: 1em;
+                padding: 10px;
+            }
+        }
+
+        .stars {
+            font-size: 1.5em;
+        }
+
+        .intro-screen, .game-screen, .end-screen, .minigame-screen {
+            display: none;
+        }
+
+        .intro-screen.active, .game-screen.active, .end-screen.active, .minigame-screen.active {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .rules-list {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border: 1px solid #e2e8f0;
+        }
+
+        @media (max-width: 768px) {
+            .rules-list {
+                padding: 15px;
+            }
+        }
+
+        .rule-item {
+            padding: 15px;
+            margin: 12px 0;
+            background: white;
+            border-radius: 10px;
+            border-left: 5px solid #4299e1;
+            transition: transform 0.3s;
+            font-size: 1.05em;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .rule-item {
+                padding: 12px;
+                font-size: 0.95em;
+            }
+        }
+
+        .rule-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .rule-letter {
+            font-size: 1.4em;
+            color: #4299e1;
+            font-weight: bold;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 8px;
+            font-family: inherit;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            min-height: 48px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            touch-action: manipulation;
+        }
+
+        @media (max-width: 768px) {
+            .btn {
+                padding: 14px 28px;
+                font-size: 1em;
+                min-height: 44px;
+                width: 90%;
+                max-width: 300px;
+            }
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .scenario-box {
+            background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            min-height: 140px;
+        }
+
+        .scenario-title {
+            color: #00695c;
+            font-size: 1.25em;
+            margin-bottom: 12px;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+
+        .scenario-text {
+            color: #1a202c;
+            font-size: 1.05em;
+            line-height: 1.7;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .scenario-box {
+                padding: 15px;
+            }
+            
+            .scenario-title {
+                font-size: 1.15em;
+            }
+            
+            .scenario-text {
+                font-size: 1em;
+            }
+        }
+
+        .choices {
+            display: grid;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .choices {
+                gap: 10px;
+            }
+        }
+
+        .choice-btn {
+            background: white;
+            border: 3px solid #4299e1;
+            color: #1a202c;
+            padding: 16px 20px;
+            font-size: 1.05em;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+            font-family: inherit;
+            line-height: 1.5;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .choice-btn {
+                padding: 14px 16px;
+                font-size: 0.95em;
+                min-height: 56px;
+            }
+        }
+
+        .choice-btn:hover {
+            background: #4299e1;
+            color: white;
+            transform: scale(1.02);
+        }
+
+        .choice-btn.correct {
+            background: #48bb78;
+            color: white;
+            border-color: #48bb78;
+            animation: correctPulse 0.5s;
+        }
+
+        .choice-btn.incorrect {
+            background: #fc8181;
+            color: white;
+            border-color: #fc8181;
+            animation: shake 0.5s;
+        }
+
+        @keyframes correctPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 1.05em;
+            line-height: 1.6;
+            font-weight: 600;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .feedback {
+                padding: 14px;
+                font-size: 0.95em;
+            }
+        }
+
+        .feedback.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .feedback.correct {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 2px solid #48bb78;
+        }
+
+        .feedback.incorrect {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 2px solid #fc8181;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 32px;
+            background: #e2e8f0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #48bb78 0%, #38a169 100%);
+            transition: width 0.5s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.95em;
+        }
+
+        @media (max-width: 768px) {
+            .progress-bar {
+                height: 28px;
+            }
+            
+            .progress-fill {
+                font-size: 0.85em;
+            }
+        }
+
+        .center-content {
+            text-align: center;
+        }
+
+        /* Game Field Styles */
+        .game-field {
+            background: linear-gradient(to bottom, #4ade80 0%, #22c55e 100%);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 15px auto;
+            position: relative;
+            height: 380px;
+            max-width: 600px;
+            border: 3px solid #16a34a;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        @media (max-width: 768px) {
+            .game-field {
+                height: 320px;
+                padding: 10px;
+                margin: 10px auto;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .game-field {
+                height: 300px;
+            }
+        }
+
+        .character {
+            position: absolute;
+            font-size: 2.2em;
+            cursor: pointer;
+            transition: all 0.3s;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        @media (max-width: 768px) {
+            .character {
+                font-size: 2em;
+                min-width: 44px;
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+
+        .character:hover {
+            transform: scale(1.2);
+        }
+
+        .character.correct {
+            animation: correctBounce 0.5s;
+        }
+
+        .character.incorrect {
+            animation: wrongShake 0.5s;
+            filter: grayscale(1);
+        }
+
+        @keyframes correctBounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.5); filter: brightness(1.5); }
+        }
+
+        @keyframes wrongShake {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(-10px) rotate(-5deg); }
+            75% { transform: translateX(10px) rotate(5deg); }
+        }
+
+        .minigame-title {
+            text-align: center;
+            color: #1a202c;
+            font-size: 1.6em;
+            margin-bottom: 10px;
+            font-weight: bold;
+            line-height: 1.3;
+        }
+
+        .minigame-instructions {
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 1.05em;
+            background: #f0f4f8;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .minigame-title {
+                font-size: 1.3em;
+            }
+            
+            .minigame-instructions {
+                font-size: 0.95em;
+                padding: 10px;
+            }
+        }
+
+        .timer-bar {
+            width: 100%;
+            height: 10px;
+            background: #e2e8f0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .timer-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+            transition: width 0.1s linear;
+        }
+
+        /* Sound wave animation */
+        .sound-wave {
+            position: absolute;
+            font-size: 1.5em;
+            animation: soundPulse 1s infinite;
+        }
+
+        @keyframes soundPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.5; }
+        }
+
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .combo-text {
+            position: absolute;
+            font-size: 2em;
+            font-weight: bold;
+            color: gold;
+            animation: comboFloat 1s ease-out;
+            pointer-events: none;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        @keyframes comboFloat {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-50px); opacity: 0; }
+        }
+
+        .trophy {
+            font-size: 4em;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .final-score {
+            font-size: 1.8em;
+            color: #4299e1;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .badge {
+            display: inline-block;
+            background: gold;
+            color: #744210;
+            padding: 10px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 8px 5px;
+            box-shadow: 0 4px 10px rgba(255, 215, 0, 0.5);
+            font-size: 0.95em;
+        }
+
+        @media (max-width: 768px) {
+            .final-score {
+                font-size: 1.5em;
+            }
+            
+            .badge {
+                padding: 8px 14px;
+                font-size: 0.85em;
+                margin: 6px 4px;
+            }
+        }
+
+        /* Better touch targets for mobile */
+        .touch-target {
+            min-width: 60px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Visual feedback for touches */
+        .touch-feedback {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            pointer-events: none;
+            animation: touchRipple 0.6s ease-out;
+        }
+
+        @keyframes touchRipple {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(3);
+                opacity: 0;
+            }
+        }
+    </style>
 </head>
-<body class="theme-day">
-  <header>
-    <h1>⚽ <span class="rule-tag">SOCCER</span> Rules Shootout</h1>
-    <div class="info">
-      <div>Rule: <strong id="ruleName">—</strong></div>
-      <div>Question <span id="qNum">1</span>/5</div>
-      <div>Set <span id="setNum">1</span>/6</div>
-    </div>
-    <div style="display:flex; gap:8px; align-items:center">
-      <label class="tiny">Theme</label>
-      <select id="themeSelect" aria-label="Theme">
-        <option value="day" selected>Day</option>
-        <option value="night">Night</option>
-        <option value="contrast">High Contrast</option>
-      </select>
-    </div>
-  </header>
-
-  <!-- START OVERLAY -->
-  <div class="start-overlay" id="startOverlay" role="dialog" aria-modal="true">
-    <div class="start-panel">
-      <h2 class="start-title">⚽ SOCCER Rules Shootout</h2>
-      <p class="start-sub">Read the question first. Then <b>scroll down</b> and kick the ball at A/B/C/D to answer. Kids Mode is on by default. No auto‑shoot.</p>
-      <div class="start-controls">
-        <div style="display:flex; gap:10px; align-items:center">
-          <label class="tiny" for="themeSelectStart">Theme</label>
-          <select id="themeSelectStart" aria-label="Theme at start">
-            <option value="day" selected>Day</option>
-            <option value="night">Night</option>
-            <option value="contrast">High Contrast</option>
-          </select>
+<body>
+    <div class="game-container">
+        <h1 class="title"><span class="soccer-ball">⚽</span> SOCCER Stars Challenge</h1>
+        
+        <!-- Intro Screen -->
+        <div class="intro-screen active">
+            <div class="rules-list">
+                <h2 style="text-align: center; color: #1a202c; margin-bottom: 20px; font-size: 1.4em;">Learn the SOCCER Rules!</h2>
+                
+                <div style="text-align: center; background: #e3f2fd; padding: 10px; border-radius: 10px; margin-bottom: 15px;">
+                    <strong>📱 HOW TO PLAY:</strong><br>
+                    Answer questions → Play fun mini-games → Master the rules!<br>
+                    <span style="color: #1976d2;">Works great on iPhone & iPad! Just TAP to play!</span>
+                </div>
+                
+                <div class="rule-item">
+                    <span class="rule-letter">S</span> - <strong>Stay in Your Role</strong> 📍
+                    <br>Stick to your position and let everyone do their job!
+                </div>
+                
+                <div class="rule-item">
+                    <span class="rule-letter">O</span> - <strong>Open on the Field, Closed Mouth</strong> 🤐
+                    <br>Be ready for passes, but quiet when coaches talk!
+                </div>
+                
+                <div class="rule-item">
+                    <span class="rule-letter">C</span> - <strong>Stay Calm When Things Go Wrong</strong> 🧘
+                    <br>Take a deep breath when frustrated!
+                </div>
+                
+                <div class="rule-item">
+                    <span class="rule-letter">C</span> - <strong>Control Your Body and Play Fair</strong> ✋
+                    <br>Use skills, not pushes! Keep everyone safe!
+                </div>
+                
+                <div class="rule-item">
+                    <span class="rule-letter">E</span> - <strong>Encourage Teammates After Mistakes</strong> 👏
+                    <br>Say "Good try!" and "Next time!" Be supportive!
+                </div>
+                
+                <div class="rule-item">
+                    <span class="rule-letter">R</span> - <strong>Respect Everyone</strong> 🤝
+                    <br>Show respect to both teams, refs, and coaches!
+                </div>
+            </div>
+            
+            <div class="center-content">
+                <button class="btn" onclick="startGame()">Start Challenge! ⚽</button>
+            </div>
         </div>
-        <button id="startBtn" class="start-btn">Start Game ▶</button>
-      </div>
-    </div>
-  </div>
 
-  <div class="wrap">
-    <!-- QUESTION CARD -->
-    <div class="card">
-      <div class="qtop">
-        <div class="breadcrumbs" id="breadcrumbs">—</div>
-        <div class="progress-dots" id="progressDots"></div>
-      </div>
-      <div class="question" id="question" aria-live="polite">—</div>
-      <div class="options" id="options"></div>
-      <div class="legend" style="margin-top:10px">
-        <div class="chip">Read first</div>
-        <div class="chip">Then scroll down and kick at A/B/C/D</div>
-      </div>
-    </div>
+        <!-- Game Screen (Q&A) -->
+        <div class="game-screen">
+            <div class="score-bar">
+                <div>Score: <span id="score">0</span>/200</div>
+                <div class="stars" id="stars">⭐⭐⭐⭐⭐</div>
+                <div>Level <span id="questionNum">1</span>/20</div>
+            </div>
 
-    <!-- FIELD -->
-    <div class="arena card" id="arena">
-      <div class="kick-line"></div>
-      <div class="center-circle"></div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress" style="width: 5%">5%</div>
+            </div>
 
-      <div class="goal-grid">
-        <div class="goal" data-letter="A"><div>A</div><div class="label">Shoot at A</div></div>
-        <div class="goal" data-letter="B"><div>B</div><div class="label">Shoot at B</div></div>
-        <div class="goal" data-letter="C"><div>C</div><div class="label">Shoot at C</div></div>
-        <div class="goal" data-letter="D"><div>D</div><div class="label">Shoot at D</div></div>
-      </div>
+            <div class="scenario-box">
+                <div class="scenario-title" id="scenarioTitle">Scenario 1</div>
+                <div class="scenario-text" id="scenarioText">Loading...</div>
+            </div>
 
-      <div class="ball" id="ball" aria-label="Soccer ball" title="Drag back and release to shoot">⚽</div>
+            <div class="choices" id="choices">
+                <!-- Choices will be added dynamically -->
+            </div>
 
-      <div class="aim" id="aim">
-        <div class="dot" id="aimDot"></div>
-        <div class="line" id="aimLine"></div>
-      </div>
+            <div class="feedback" id="feedback">
+                <!-- Feedback will be shown here -->
+            </div>
 
-      <div class="overlay" id="overlay">
-        <div class="panel">
-          <div class="big" id="overlayTitle">Nice Shot!</div>
-          <h3 id="overlayPrompt">—</h3>
-          <p class="tiny" id="overlayExplain">—</p>
-          <div style="margin-top:10px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap">
-            <button id="nextBtn" class="start-btn">Next Question ▶</button>
-            <button id="retryBtn">Replay Shot</button>
-          </div>
+            <div class="center-content">
+                <button class="btn" id="nextBtn" style="display: none;" onclick="proceedToMinigame()">Practice This Rule! →</button>
+            </div>
         </div>
-      </div>
-    </div>
 
-    <!-- SCOREBOARD -->
-    <div class="card">
-      <div style="display:flex; gap:8px; align-items:center; justify-content:space-between; flex-wrap:wrap">
-        <div class="legend"><div class="chip">Kids Mode default</div></div>
-        <div class="scoreboard">
-          <div class="pill">Score: <span id="score">0</span></div>
-          <div class="pill">Best (this browser): <span id="best">0</span></div>
-          <div class="pill">Hearts ❤️: <span id="hearts">3</span></div>
+        <!-- Minigame Screen -->
+        <div class="minigame-screen">
+            <div class="score-bar">
+                <div>Score: <span id="minigameScore">0</span>/200</div>
+                <div class="stars" id="minigameStars">⭐⭐⭐⭐⭐</div>
+                <div>Practice Game!</div>
+            </div>
+
+            <h2 class="minigame-title" id="minigameTitle">Practice Time!</h2>
+            <p class="minigame-instructions" id="minigameInstructions">Instructions</p>
+            
+            <div class="timer-bar" id="timerBar" style="display: none;">
+                <div class="timer-fill" id="timerFill" style="width: 100%"></div>
+            </div>
+
+            <div class="game-field" id="gameField">
+                <!-- Game content will be added dynamically -->
+            </div>
+
+            <div class="center-content">
+                <button class="btn" id="continueBtn" style="display: none;" onclick="nextQuestion()">Next Challenge →</button>
+            </div>
         </div>
-      </div>
+
+        <!-- End Screen -->
+        <div class="end-screen">
+            <div class="center-content">
+                <div class="trophy">🏆</div>
+                <h2 style="color: #1a202c; margin: 20px 0; font-size: 1.6em;">Challenge Complete!</h2>
+                <div class="final-score">Final Score: <span id="finalScore">0</span>/200</div>
+                <div id="badges"></div>
+                <div style="margin: 20px 0; color: #2d3748; font-size: 1.05em; font-weight: 600; line-height: 1.5;" id="finalMessage"></div>
+                <button class="btn" onclick="location.reload()">Play Again! ⚽</button>
+            </div>
+        </div>
     </div>
-  </div>
 
-<script>
-/* =======================
-   TUNING (adjust if you like)
-   ======================= */
-const BALL_R = 23;           // radius in px
-const FRICTION = 0.985;      // 0.97–0.99; lower = stops faster
-const BOUNCE = 0.38;         // 0.2–0.5; lower = softer bounce
-const MAX_V = 32;            // cap speed so it’s not bonkers
-const POWER_BASE = 0.18;     // base power multiplier
-const POWER_MIN = 0.13;
-const POWER_MAX = 0.22;
+    <script>
+        let currentQuestion = 0;
+        let score = 0;
+        let answeredCurrentQuestion = false;
+        let currentRule = '';
+        let minigameTimer = null;
 
-/* ----------------- Content ----------------- */
-const QUESTION_SETS = [
-  { code:'S', name:'Stay in Your Role', blurb:"Stick to your assigned spot. Players play, coaches coach, refs ref.", questions:[
-    { stem:"You’re playing <b>defender</b>. Our striker is dribbling toward their goal. What should you do?",
-      options:["Sprint forward to try to score too, leaving our half empty.","Hold your spot, talk with backs, be ready to stop a counterattack.","Switch with the keeper “for fun” this play.","Tell the ref how to coach the other team."],
-      correct:1, why:"Defenders defend. Staying home protects team shape and stops fast breaks." },
-    { stem:"You’re a <b>midfielder</b> at kickoff. Coach says you’re on the left. Where should you play most?",
-      options:["Anywhere the ball goes, even if we end up stacked on top of each other.","Mostly the left side: help defend and attack from there to keep our shape.","Behind the goal to chat with a friend.","Wherever the ref can’t see you."],
-      correct:1, why:"Staying in your lane keeps balance—no swarm-ball." },
-    { stem:"The ref gives the other team a throw‑in. You think it was ours. What now?",
-      options:["Argue until the call changes.","Get into position and defend. Refs ref; players play.","Shout that the ref needs glasses.","Walk away and stop trying."],
-      correct:1, why:"Respect roles. Set up and win the ball back." },
-    { stem:"Halftime: coach is giving directions.",
-      options:["Talk over coach about your favorite video game.","Listen. Quiet mouth, eyes up. Ask questions when invited.","Coach yourself and ignore the plan.","Start making substitutions on your own."],
-      correct:1, why:"Players play; coaches coach. Listening is part of the role." },
-    { stem:"You’re our <b>goalkeeper</b> on an opponent’s corner kick. What’s your job?",
-      options:["Run to midfield to try to score.","Stay in goal area, organize defenders, and be ready to catch/clear.","Take the corner for them to be nice.","Tie your shoes during the kick."],
-      correct:1, why:"Keeper stays home and leads the defense." }
-  ]},
-  { code:'O', name:'Open on the Field, Closed Mouth', blurb:"Move into space for passes. Be quiet when coaches/refs speak.", questions:[
-    { stem:"Your teammate has the ball and you’re <b>covered</b>. What’s best?",
-      options:["Stand right behind your defender and yell “Pass!”","Move into open space where your teammate can see you.","Run next to your teammate so you both trip.","Stop moving and hope the ball appears."],
-      correct:1, why:"Get open by moving into space and showing for the pass." },
-    { stem:"Coach starts talking in practice.",
-      options:["Keep juggling and chat with a friend.","Mouth closed, eyes on coach, listen.","Shout your idea over coach’s voice.","Blow a whistle you found."],
-      correct:1, why:"Closed mouth during instruction = respect and learning." },
-    { stem:"The ref makes a call you don’t like.",
-      options:["Roll your eyes and complain.","Zip it, reset, and play the next play.","Ask the crowd what they think.","Tell the ref you googled the rules."],
-      correct:1, why:"Save your breath for the next run. Play on." },
-    { stem:"You want the ball on the wing. What should you do?",
-      options:["Drift into space and show a hand for the pass.","Hide behind two defenders.","Run off the field to be really open.","Lie down for a quick nap."],
-      correct:0, why:"Show in a passing lane—open body, eye contact." },
-    { stem:"Team huddle while coach talks.",
-      options:["Whisper a joke to a buddy.","Quiet body, quiet mouth—listen up.","Sing the national anthem.","Practice bicycle kicks in the circle."],
-      correct:1, why:"Open on the field, closed mouth during coaching." }
-  ]},
-  { code:'C1', name:'Stay Calm When Things Go Wrong', blurb:"Breathe, reset, and play the next play.", questions:[
-    { stem:"You miss an easy shot. What now?",
-      options:["Kick the ground and yell.","Deep breath—‘next play’—hustle back.","Quit the game.","Blame the ball."],
-      correct:1, why:"Calm minds make better next plays." },
-    { stem:"An opponent bumps you by accident.",
-      options:["Shove them back harder.","Take a breath, keep balance, play on.","Scream “foul!” and stop playing.","Give a long lecture."],
-      correct:1, why:"Stay calm and keep control of the moment." },
-    { stem:"Your pass gets intercepted.",
-      options:["Freeze and sigh loudly.","Breathe; try to win it back or get into shape.","Tell teammates to do your job.","Ask to switch sports mid‑game."],
-      correct:1, why:"Reset fast—defend or get in position." },
-    { stem:"You fall down.",
-      options:["Pound the grass.","Quick check you’re okay, pop up, rejoin.","Nap time.","Sneak a snack."],
-      correct:1, why:"Fast recoveries help the team." },
-    { stem:"We’re losing with two minutes left.",
-      options:["Panic and boot the ball anywhere.","Breathe; make simple passes; look for good chances.","Trash talk to feel better.","Hide behind the goal."],
-      correct:1, why:"Calm choices beat panic kicks." }
-  ]},
-  { code:'C2', name:'Control Your Body and Play Fair', blurb:"Use skill, not shoves. Keep everyone safe.", questions:[
-    { stem:"You’re defending a dribbler.",
-      options:["Use shoulder‑to‑shoulder and go for the ball.","Push in the back.","Grab the jersey.","Slide tackle from behind."],
-      correct:0, why:"Fair contact + clean tackle = great defense." },
-    { stem:"Opponent is shielding the ball.",
-      options:["Run through them.","Move your feet around and poke the ball.","Step on their heel.","Yell in their ear."],
-      correct:1, why:"Beat shielding with footwork, not fouls." },
-    { stem:"Ball is in the air and you’re a field player.",
-      options:["Punch it with your hand.","Chest it down or head it safely.","Catch it and throw to a friend.","Smack it like volleyball."],
-      correct:1, why:"No hands (unless you’re the keeper in your box)." },
-    { stem:"You’re late to a tackle.",
-      options:["Swing your leg anyway and trip the player.","Slow down, contain, and wait for help.","Kick their ankle a little.","Slide tackle near their knees."],
-      correct:1, why:"Contain first; tackle when you can do it safely." },
-    { stem:"Ref blows the whistle.",
-      options:["Keep playing and shoot.","Stop, back up, and give space for the kick.","Argue about the whistle volume.","Move the ball for the other team without asking."],
-      correct:1, why:"Whistle = stop. Respect the restart." }
-  ]},
-  { code:'E', name:'Encourage Teammates After Mistakes', blurb:"Say “Good try!” and help teammates bounce back.", questions:[
-    { stem:"A teammate misses a shot.",
-      options:["“How could you miss that?!”","“Great run—next one!”","“Pass only to me next time.”","Silent glare."],
-      correct:1, why:"Encouragement builds confidence and effort." },
-    { stem:"Goalkeeper lets one in.",
-      options:["“You’re the worst.”","“Shake it off—we’ve got you!”","“Totally your fault.”","Wave sarcastically."],
-      correct:1, why:"Support your keeper. Next play!" },
-    { stem:"Teammate dribbles out of bounds.",
-      options:["“Pay attention!”","“I like the idea—try a pass‑and‑go next time!”","Roll your eyes.","Laugh."],
-      correct:1, why:"Positive + specific beats criticism." },
-    { stem:"Teammate whiffs on a clearance.",
-      options:["“Yikes.”","“Right read—next one’s yours!”","“You owe us a goal.”","“Don’t play defense.”"],
-      correct:1, why:"We praise the effort and get ready for the next play." },
-    { stem:"A new player makes a mistake.",
-      options:["“We don’t pass to rookies.”","“Welcome! Keep going—we’re glad you’re here.”","“Sit down.”","“Tell the coach you’re not ready.”"],
-      correct:1, why:"Belonging makes teams better." }
-  ]},
-  { code:'R', name:'Respect Everyone (even the other team)', blurb:"Respect teammates, refs, and opponents—always.", questions:[
-    { stem:"Before the game.",
-      options:["Ignore the other team.","Line up, shake hands, say “Have a good game!”","Tell them you’ll crush them.","Block their warmup shots."],
-      correct:1, why:"Start with sportsmanship." },
-    { stem:"After you score.",
-      options:["Mock the goalkeeper.","Celebrate with teammates, then reset.","Tell the other team they stink.","Stare down the ref."],
-      correct:1, why:"Celebrate without disrespect." },
-    { stem:"An opponent is hurt.",
-      options:["Keep dribbling and ignore it.","Kick the ball out or stop if the ref whistles, and check on them.","Make fun of them.","Take their water."],
-      correct:1, why:"People first. Soccer second." },
-    { stem:"The ref makes a tough call.",
-      options:["Boo the ref.","Respect the call and play on.","Announce your own rules.","Ask the crowd to vote."],
-      correct:1, why:"Respect keeps the game safe and fun." },
-    { stem:"Opponents make a mistake.",
-      options:["Laugh loudly.","Encourage your team and keep playing.","Taunt them.","Copy the mistake to tease."],
-      correct:1, why:"We lift our team—never tear others down." }
-  ]}
-];
+        const scenarios = [
+            {
+                title: "⚽ Position Time!",
+                text: "Coach tells you to play defense today, but you really want to score goals. What do you do?",
+                rule: "S",
+                choices: [
+                    { text: "Run up to score anyway - goals are more fun!", correct: false },
+                    { text: "Stay in defense like coach said and do your best there!", correct: true },
+                    { text: "Argue with the coach about changing positions", correct: false }
+                ],
+                feedback: {
+                    correct: "Awesome! You remembered 'S - Stay in Your Role!' Every position is important! 📍",
+                    incorrect: "Remember 'S - Stay in Your Role!' Trust your coach and stick to your position! 📍"
+                }
+            },
+            {
+                title: "🗣️ Coach is Talking",
+                text: "During halftime, coach is explaining the game plan. Your friend starts telling you a funny joke. What should you do?",
+                rule: "O",
+                choices: [
+                    { text: "Listen to the joke and laugh - it's halftime fun time!", correct: false },
+                    { text: "Tell your friend to be quiet and pay attention to coach", correct: true },
+                    { text: "Start your own conversation about the first half", correct: false }
+                ],
+                feedback: {
+                    correct: "Perfect! 'O - Open on field, Closed Mouth!' When coach talks, we listen! 🤐",
+                    incorrect: "Remember 'O - Open on field, Closed Mouth!' Keep quiet when coach is talking! 🤐"
+                }
+            },
+            {
+                title: "😤 Bad Call?",
+                text: "The referee calls you offside, but you don't think you were. You feel really frustrated. What's the best response?",
+                rule: "C1",
+                choices: [
+                    { text: "Yell at the referee that they're wrong", correct: false },
+                    { text: "Take a deep breath and get back in position", correct: true },
+                    { text: "Kick the ball away in anger", correct: false }
+                ],
+                feedback: {
+                    correct: "Great job! 'C - Stay Calm When Things Go Wrong!' Deep breaths help! 🧘",
+                    incorrect: "Remember 'C - Stay Calm When Things Go Wrong!' Take a deep breath! 🧘"
+                }
+            },
+            {
+                title: "⚡ Going for the Ball",
+                text: "An opponent has the ball and you're chasing them. They're a bit faster than you. What should you do?",
+                rule: "C2",
+                choices: [
+                    { text: "Push them from behind to slow them down", correct: false },
+                    { text: "Grab their shirt to stop them", correct: false },
+                    { text: "Use your positioning and footwork to try to win the ball", correct: true }
+                ],
+                feedback: {
+                    correct: "Excellent! 'C - Control Your Body and Play Fair!' Skills over fouls! ✋",
+                    incorrect: "Remember 'C - Control Your Body and Play Fair!' Use skills, not pushes! ✋"
+                }
+            },
+            {
+                title: "😢 Teammate's Mistake",
+                text: "Your teammate misses an easy goal and looks really upset. What do you say?",
+                rule: "E",
+                choices: [
+                    { text: "\"How did you miss that?! It was so easy!\"", correct: false },
+                    { text: "\"Good try! You'll get the next one!\"", correct: true },
+                    { text: "Say nothing and look disappointed", correct: false }
+                ],
+                feedback: {
+                    correct: "Fantastic! 'E - Encourage Teammates After Mistakes!' Great sportsmanship! 👏",
+                    incorrect: "Remember 'E - Encourage Teammates After Mistakes!' Be supportive! 👏"
+                }
+            },
+            {
+                title: "🎯 On the Field Again",
+                text: "You're open for a pass during the game. The coach is also giving instructions. What do you do?",
+                rule: "O",
+                choices: [
+                    { text: "Yell loudly for the ball while coach is talking", correct: false },
+                    { text: "Get in position quietly and raise your hand for the ball", correct: true },
+                    { text: "Run to a different position without listening", correct: false }
+                ],
+                feedback: {
+                    correct: "Nice work! 'O - Open on Field, Closed Mouth!' Perfect balance! 🤐",
+                    incorrect: "Remember 'O - Open on Field, Closed Mouth!' Be ready but respectful! 🤐"
+                }
+            },
+            {
+                title: "🏃 After the Goal",
+                text: "The other team scores a goal. One of their players celebrates near you. How do you react?",
+                rule: "R",
+                choices: [
+                    { text: "Push them away from your area", correct: false },
+                    { text: "Say something mean about their celebration", correct: false },
+                    { text: "Let them celebrate and focus on the restart", correct: true }
+                ],
+                feedback: {
+                    correct: "Outstanding! 'R - Respect Everyone!' Even the other team! 🤝",
+                    incorrect: "Remember 'R - Respect Everyone!' This includes the other team! 🤝"
+                }
+            },
+            {
+                title: "🥅 Goalkeeper Error",
+                text: "Your goalkeeper lets in an easy goal. The whole team is disappointed. What's the right thing to do?",
+                rule: "E",
+                choices: [
+                    { text: "Tell them \"It's okay, shake it off! Let's go!\"", correct: true },
+                    { text: "Roll your eyes and shake your head", correct: false },
+                    { text: "Tell them they should have saved it", correct: false }
+                ],
+                feedback: {
+                    correct: "Perfect! 'E - Encourage Teammates After Mistakes!' True team spirit! 👏",
+                    incorrect: "Remember 'E - Encourage Teammates After Mistakes!' Support your team! 👏"
+                }
+            },
+            {
+                title: "🎮 Playing Your Position",
+                text: "You're playing midfielder but you see the striker's position is open and looks fun. What do you do?",
+                rule: "S",
+                choices: [
+                    { text: "Stay in midfield and do your job well", correct: true },
+                    { text: "Move to striker without asking", correct: false },
+                    { text: "Complain loudly that you want to play striker", correct: false }
+                ],
+                feedback: {
+                    correct: "Excellent! 'S - Stay in Your Role!' Team player award! 📍",
+                    incorrect: "Remember 'S - Stay in Your Role!' Every position matters! 📍"
+                }
+            },
+            {
+                title: "💪 Tough Opponent",
+                text: "You're defending against a really skilled player who keeps getting past you. You're getting frustrated. What now?",
+                rule: "C1",
+                choices: [
+                    { text: "Trip them the next time they try", correct: false },
+                    { text: "Take a breath and keep trying your best with good defense", correct: true },
+                    { text: "Get angry and play more aggressively", correct: false }
+                ],
+                feedback: {
+                    correct: "Amazing! You used 'C - Stay Calm!' Deep breaths and keep trying! 🧘",
+                    incorrect: "Remember 'C - Stay Calm When Things Go Wrong!' Breathe and refocus! 🧘"
+                }
+            }
+        ];
 
-/* ============ Storage + Theme ============ */
-const STORAGE_KEY="soccer_rules_best";
-const THEME_KEY="soccer_rules_theme";
-const getBest=()=> Number(localStorage.getItem(STORAGE_KEY) || 0);
-const setBest=(v)=> localStorage.setItem(STORAGE_KEY, String(v));
-const getTheme=()=> localStorage.getItem(THEME_KEY) || 'day';
-const setTheme=(v)=> localStorage.setItem(THEME_KEY, v);
+        const minigames = {
+            'S': {
+                title: "Position Keeper!",
+                instructions: "📱 SWIPE or TAP the arrows to collect balls in YOUR zone (blue). Avoid red zones!",
+                setup: setupPositionKeeperGame
+            },
+            'O': {
+                title: "Listen & Play!",
+                instructions: "📱 When coach speaks (🗣️), TAP 'LISTEN'. When playing (⚽), TAP 'CALL FOR BALL'!",
+                setup: setupListenAndPlayGame
+            },
+            'C1': {
+                title: "Calm Down Challenge!",
+                instructions: "📱 TAP the breathing circle when it's BIG to stay calm after bad calls!",
+                setup: setupCalmDownGame
+            },
+            'C2': {
+                title: "Fair Play Dribble!",
+                instructions: "📱 SWIPE to dribble around cones. Don't knock them over!",
+                setup: setupFairPlayDribbleGame
+            },
+            'E': {
+                title: "Team Spirit!",
+                instructions: "📱 TAP teammates to give encouragement when they make mistakes!",
+                setup: setupTeamSpiritGame
+            },
+            'R': {
+                title: "Respect Rally!",
+                instructions: "📱 Choose respectful actions after each play!",
+                setup: setupRespectRallyGame
+            }
+        };
 
-/* ============ DOM refs ============ */
-const ruleName = document.getElementById('ruleName');
-const setNum = document.getElementById('setNum');
-const qNum = document.getElementById('qNum');
-const questionEl = document.getElementById('question');
-const optionsEl = document.getElementById('options');
-const scoreEl = document.getElementById('score');
-const bestEl = document.getElementById('best');
-const heartsEl = document.getElementById('hearts');
-const breadcrumbsEl = document.getElementById('breadcrumbs');
-const progressDots = document.getElementById('progressDots');
+        function startGame() {
+            document.querySelector('.intro-screen').classList.remove('active');
+            document.querySelector('.game-screen').classList.add('active');
+            loadQuestion();
+        }
 
-const arena = document.getElementById('arena');
-const ball = document.getElementById('ball');
-const aim = document.getElementById('aim');
-const aimLine = document.getElementById('aimLine');
-const aimDot = document.getElementById('aimDot');
+        function loadQuestion() {
+            answeredCurrentQuestion = false;
+            const scenario = scenarios[currentQuestion];
+            currentRule = scenario.rule;
+            
+            document.getElementById('questionNum').textContent = (currentQuestion * 2) + 1;
+            document.getElementById('scenarioTitle').textContent = scenario.title;
+            document.getElementById('scenarioText').textContent = scenario.text;
+            
+            const choicesDiv = document.getElementById('choices');
+            choicesDiv.innerHTML = '';
+            
+            const shuffled = [...scenario.choices].sort(() => Math.random() - 0.5);
+            
+            shuffled.forEach((choice) => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn';
+                btn.textContent = choice.text;
+                
+                addTapHandler(btn, () => checkAnswer(choice, btn, scenario));
+                
+                choicesDiv.appendChild(btn);
+            });
+            
+            document.getElementById('feedback').className = 'feedback';
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('nextBtn').style.display = 'none';
+        }
 
-const overlay = document.getElementById('overlay');
-const overlayTitle = document.getElementById('overlayTitle');
-const overlayPrompt = document.getElementById('overlayPrompt');
-const overlayExplain = document.getElementById('overlayExplain');
-const nextBtn = document.getElementById('nextBtn');
-const retryBtn = document.getElementById('retryBtn');
+        function checkAnswer(choice, btn, scenario) {
+            if (answeredCurrentQuestion) return;
+            answeredCurrentQuestion = true;
+            
+            const allButtons = document.querySelectorAll('.choice-btn');
+            
+            allButtons.forEach(button => {
+                button.style.pointerEvents = 'none';
+            });
+            
+            if (choice.correct) {
+                btn.classList.add('correct');
+                score += 10;
+                document.getElementById('score').textContent = score;
+                showFeedback(true, scenario.feedback.correct);
+            } else {
+                btn.classList.add('incorrect');
+                showFeedback(false, scenario.feedback.incorrect);
+                
+                allButtons.forEach(button => {
+                    const correctChoice = scenario.choices.find(c => c.correct);
+                    if (button.textContent === correctChoice.text) {
+                        button.classList.add('correct');
+                    }
+                });
+            }
+            
+            updateStars();
+            document.getElementById('nextBtn').style.display = 'inline-block';
+        }
 
-const startOverlay = document.getElementById('startOverlay');
-const startBtn = document.getElementById('startBtn');
-const themeSelect = document.getElementById('themeSelect');
-const themeSelectStart = document.getElementById('themeSelectStart');
+        function showFeedback(isCorrect, message) {
+            const feedback = document.getElementById('feedback');
+            feedback.className = `feedback show ${isCorrect ? 'correct' : 'incorrect'}`;
+            feedback.textContent = message;
+        }
 
-/* ============ State ============ */
-let state = {
-  setIndex:0, qIndex:0, score:0, hearts:3, answered:false,
-  vx:0, vy:0, raf:0, dragging:false, pointerId:null, dragStart:null, lastTS:0,
-  ballX:40, ballY:40
-};
+        function proceedToMinigame() {
+            document.querySelector('.game-screen').classList.remove('active');
+            document.querySelector('.minigame-screen').classList.add('active');
+            
+            const ruleKey = currentRule === 'C1' ? 'C1' : currentRule === 'C2' ? 'C2' : currentRule;
+            const game = minigames[ruleKey];
+            
+            document.getElementById('minigameTitle').textContent = game.title;
+            document.getElementById('minigameInstructions').textContent = game.instructions;
+            document.getElementById('minigameScore').textContent = score;
+            document.getElementById('continueBtn').style.display = 'none';
+            
+            game.setup();
+        }
 
-/* ============ Helpers ============ */
-function buildProgress(){
-  progressDots.innerHTML='';
-  for(let i=0;i<5;i++){
-    const d=document.createElement('div'); d.className='dot';
-    if(i<state.qIndex) d.classList.add('done');
-    if(i===state.qIndex) d.classList.add('current');
-    progressDots.appendChild(d);
-  }
-}
-function applyTheme(val){
-  const cls = 'theme-' + val;
-  document.body.classList.remove('theme-day','theme-night','theme-contrast');
-  document.body.classList.add(cls);
-  setTheme(val);
-  themeSelect.value = val; themeSelectStart.value = val;
-}
-themeSelect.addEventListener('change',(e)=> applyTheme(e.target.value));
-themeSelectStart.addEventListener('change',(e)=> applyTheme(e.target.value));
+        // Helper function for touch/click compatibility
+        function addTapHandler(element, handler) {
+            let touchFired = false;
+            
+            element.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                touchFired = true;
+                handler.call(this, e);
+            }, { passive: false });
+            
+            element.addEventListener('click', function(e) {
+                if (!touchFired) {
+                    handler.call(this, e);
+                }
+                touchFired = false;
+            });
+        }
 
-function currentSet(){ return QUESTION_SETS[state.setIndex]; }
-function currentQ(){ return currentSet().questions[state.qIndex]; }
+        // Visual touch feedback
+        function createTouchFeedback(x, y, parent) {
+            const feedback = document.createElement('div');
+            feedback.className = 'touch-feedback';
+            feedback.style.left = x + 'px';
+            feedback.style.top = y + 'px';
+            parent.appendChild(feedback);
+            setTimeout(() => feedback.remove(), 600);
+        }
 
-function loadCurrent(){
-  const set = currentSet();
-  const q = currentQ();
-  ruleName.textContent = `${set.code} – ${set.name}`;
-  setNum.textContent = state.setIndex+1;
-  qNum.textContent = state.qIndex+1;
-  questionEl.innerHTML = q.stem;
-  buildProgress();
-  breadcrumbsEl.innerHTML = `<b>${set.code}</b> ${set.name} • ${set.blurb}`;
+        // NEW: Position Keeper Game (S - Stay in Your Role)
+        function setupPositionKeeperGame() {
+            const field = document.getElementById('gameField');
+            field.innerHTML = '';
+            
+            let collected = 0;
+            let wrongZone = 0;
+            let playerX = 50;
+            
+            // Create zones
+            const zones = ['LEFT (RED)', 'CENTER (YOUR ZONE)', 'RIGHT (RED)'];
+            zones.forEach((zone, i) => {
+                const zoneDiv = document.createElement('div');
+                zoneDiv.style.position = 'absolute';
+                zoneDiv.style.left = (i * 33) + '%';
+                zoneDiv.style.top = '0';
+                zoneDiv.style.width = '33%';
+                zoneDiv.style.height = '100%';
+                zoneDiv.style.borderRight = i < 2 ? '2px dashed white' : 'none';
+                zoneDiv.style.background = i === 1 ? 'rgba(66, 153, 225, 0.3)' : 'rgba(255, 0, 0, 0.15)';
+                
+                const label = document.createElement('div');
+                label.style.position = 'absolute';
+                label.style.left = '5px';
+                label.style.top = '5px';
+                label.style.color = 'white';
+                label.style.fontWeight = 'bold';
+                label.style.fontSize = '0.9em';
+                label.textContent = zone;
+                zoneDiv.appendChild(label);
+                
+                field.appendChild(zoneDiv);
+            });
+            
+            // Player
+            const player = document.createElement('div');
+            player.className = 'character';
+            player.textContent = '🧑‍⚽';
+            player.style.left = playerX + '%';
+            player.style.bottom = '20px';
+            player.style.fontSize = '2.5em';
+            player.style.transform = 'translateX(-50%)';
+            field.appendChild(player);
+            
+            // Controls
+            const leftBtn = document.createElement('button');
+            leftBtn.className = 'touch-target';
+            leftBtn.innerHTML = '⬅️<br>LEFT';
+            leftBtn.style.position = 'absolute';
+            leftBtn.style.left = '10px';
+            leftBtn.style.bottom = '20px';
+            leftBtn.style.padding = '10px';
+            leftBtn.style.fontSize = '1.2em';
+            leftBtn.style.background = '#4299e1';
+            leftBtn.style.color = 'white';
+            leftBtn.style.border = 'none';
+            leftBtn.style.borderRadius = '10px';
+            leftBtn.style.fontWeight = 'bold';
+            
+            const rightBtn = document.createElement('button');
+            rightBtn.className = 'touch-target';
+            rightBtn.innerHTML = '➡️<br>RIGHT';
+            rightBtn.style.position = 'absolute';
+            rightBtn.style.right = '10px';
+            rightBtn.style.bottom = '20px';
+            rightBtn.style.padding = '10px';
+            rightBtn.style.fontSize = '1.2em';
+            rightBtn.style.background = '#4299e1';
+            rightBtn.style.color = 'white';
+            rightBtn.style.border = 'none';
+            rightBtn.style.borderRadius = '10px';
+            rightBtn.style.fontWeight = 'bold';
+            
+            addTapHandler(leftBtn, (e) => {
+                playerX = Math.max(10, playerX - 15);
+                player.style.left = playerX + '%';
+                createTouchFeedback(e.pageX || 50, e.pageY || 50, document.body);
+            });
+            
+            addTapHandler(rightBtn, (e) => {
+                playerX = Math.min(90, playerX + 15);
+                player.style.left = playerX + '%';
+                createTouchFeedback(e.pageX || 50, e.pageY || 50, document.body);
+            });
+            
+            field.appendChild(leftBtn);
+            field.appendChild(rightBtn);
+            
+            // Create falling balls
+            function createBall() {
+                const ball = document.createElement('div');
+                ball.className = 'character';
+                ball.textContent = '⚽';
+                ball.style.left = (10 + Math.random() * 80) + '%';
+                ball.style.top = '0';
+                ball.style.fontSize = '2em';
+                ball.style.transition = 'top 2s linear';
+                field.appendChild(ball);
+                
+                setTimeout(() => {
+                    ball.style.top = '100%';
+                }, 100);
+                
+                const checkCatch = setInterval(() => {
+                    const ballX = parseFloat(ball.style.left);
+                    const ballY = parseFloat(ball.style.top);
+                    
+                    if (ballY > 75 && ballY < 90) {
+                        if (Math.abs(ballX - playerX) < 10) {
+                            clearInterval(checkCatch);
+                            ball.remove();
+                            
+                            if (playerX > 33 && playerX < 66) {
+                                collected++;
+                                score += 2;
+                                document.getElementById('minigameScore').textContent = score;
+                                
+                                const msg = document.createElement('div');
+                                msg.textContent = '✅ In your zone!';
+                                msg.className = 'combo-text';
+                                msg.style.left = playerX + '%';
+                                msg.style.bottom = '100px';
+                                field.appendChild(msg);
+                                setTimeout(() => msg.remove(), 1000);
+                            } else {
+                                wrongZone++;
+                                
+                                const msg = document.createElement('div');
+                                msg.textContent = '❌ Wrong zone!';
+                                msg.style.position = 'absolute';
+                                msg.style.left = playerX + '%';
+                                msg.style.bottom = '100px';
+                                msg.style.color = 'red';
+                                msg.style.fontWeight = 'bold';
+                                msg.style.transform = 'translateX(-50%)';
+                                field.appendChild(msg);
+                                setTimeout(() => msg.remove(), 1000);
+                            }
+                        }
+                    }
+                    
+                    if (ballY >= 95) {
+                        clearInterval(checkCatch);
+                        ball.remove();
+                    }
+                }, 50);
+            }
+            
+            const ballInterval = setInterval(createBall, 1500);
+            
+            setTimeout(() => {
+                clearInterval(ballInterval);
+                showMinigameComplete(`Collected ${collected} in your zone! ${wrongZone === 0 ? 'Perfect positioning!' : 'Remember: Stay in your zone!'}`);
+            }, 10000);
+        }
 
-  // options text only (no auto-shoot)
-  const letters = ['A','B','C','D'];
-  optionsEl.innerHTML='';
-  q.options.forEach((txt, i)=>{
-    const row = document.createElement('div'); row.className='opt';
-    const badge = document.createElement('div'); badge.className='badge'; badge.textContent=letters[i];
-    const span = document.createElement('div'); span.innerHTML = txt;
-    row.appendChild(badge); row.appendChild(span);
-    optionsEl.appendChild(row);
-  });
+        // NEW: Listen & Play Game (O - Open/Closed Mouth)
+        function setupListenAndPlayGame() {
+            const field = document.getElementById('gameField');
+            field.innerHTML = '';
+            
+            let correctActions = 0;
+            let mistakes = 0;
+            let isCoachTalking = false;
+            
+            // Coach/Game indicator
+            const indicator = document.createElement('div');
+            indicator.style.position = 'absolute';
+            indicator.style.top = '30%';
+            indicator.style.left = '50%';
+            indicator.style.transform = 'translateX(-50%)';
+            indicator.style.fontSize = '4em';
+            indicator.style.textAlign = 'center';
+            field.appendChild(indicator);
+            
+            // Status text
+            const statusText = document.createElement('div');
+            statusText.style.position = 'absolute';
+            statusText.style.top = '50%';
+            statusText.style.left = '50%';
+            statusText.style.transform = 'translate(-50%, -50%)';
+            statusText.style.fontSize = '1.5em';
+            statusText.style.fontWeight = 'bold';
+            statusText.style.color = 'white';
+            statusText.style.textAlign = 'center';
+            field.appendChild(statusText);
+            
+            // Action buttons
+            const listenBtn = document.createElement('button');
+            listenBtn.className = 'touch-target';
+            listenBtn.innerHTML = '👂<br>LISTEN';
+            listenBtn.style.position = 'absolute';
+            listenBtn.style.left = '25%';
+            listenBtn.style.bottom = '20%';
+            listenBtn.style.transform = 'translateX(-50%)';
+            listenBtn.style.padding = '15px 25px';
+            listenBtn.style.fontSize = '1.3em';
+            listenBtn.style.background = '#10b981';
+            listenBtn.style.color = 'white';
+            listenBtn.style.border = 'none';
+            listenBtn.style.borderRadius = '15px';
+            listenBtn.style.fontWeight = 'bold';
+            
+            const callBtn = document.createElement('button');
+            callBtn.className = 'touch-target';
+            callBtn.innerHTML = '🙋<br>CALL FOR BALL';
+            callBtn.style.position = 'absolute';
+            callBtn.style.right = '25%';
+            callBtn.style.bottom = '20%';
+            callBtn.style.transform = 'translateX(50%)';
+            callBtn.style.padding = '15px 25px';
+            callBtn.style.fontSize = '1.3em';
+            callBtn.style.background = '#4299e1';
+            callBtn.style.color = 'white';
+            callBtn.style.border = 'none';
+            callBtn.style.borderRadius = '15px';
+            callBtn.style.fontWeight = 'bold';
+            
+            function updateStatus() {
+                isCoachTalking = Math.random() > 0.5;
+                
+                if (isCoachTalking) {
+                    indicator.textContent = '🗣️';
+                    statusText.textContent = 'Coach is talking!';
+                    statusText.style.color = '#fbbf24';
+                } else {
+                    indicator.textContent = '⚽';
+                    statusText.textContent = 'Game is on!';
+                    statusText.style.color = '#10b981';
+                }
+            }
+            
+            addTapHandler(listenBtn, (e) => {
+                createTouchFeedback(e.pageX || 50, e.pageY || 50, document.body);
+                
+                if (isCoachTalking) {
+                    correctActions++;
+                    score += 2;
+                    document.getElementById('minigameScore').textContent = score;
+                    
+                    const msg = document.createElement('div');
+                    msg.textContent = '✅ Good listening!';
+                    msg.className = 'combo-text';
+                    msg.style.left = '50%';
+                    msg.style.top = '70%';
+                    field.appendChild(msg);
+                    setTimeout(() => msg.remove(), 1000);
+                } else {
+                    mistakes++;
+                    
+                    const msg = document.createElement('div');
+                    msg.textContent = '❌ Game is on! Call for ball!';
+                    msg.style.position = 'absolute';
+                    msg.style.left = '50%';
+                    msg.style.top = '70%';
+                    msg.style.transform = 'translateX(-50%)';
+                    msg.style.color = 'red';
+                    msg.style.fontWeight = 'bold';
+                    field.appendChild(msg);
+                    setTimeout(() => msg.remove(), 1000);
+                }
+            });
+            
+            addTapHandler(callBtn, (e) => {
+                createTouchFeedback(e.pageX || 50, e.pageY || 50, document.body);
+                
+                if (!isCoachTalking) {
+                    correctActions++;
+                    score += 2;
+                    document.getElementById('minigameScore').textContent = score;
+                    
+                    const msg = document.createElement('div');
+                    msg.textContent = '✅ Good call!';
+                    msg.className = 'combo-text';
+                    msg.style.left = '50%';
+                    msg.style.top = '70%';
+                    field.appendChild(msg);
+                    setTimeout(() => msg.remove(), 1000);
+                } else {
+                    mistakes++;
+                    
+                    const msg = document.createElement('div');
+                    msg.textContent = '❌ Shh! Coach is talking!';
+                    msg.style.position = 'absolute';
+                    msg.style.left = '50%';
+                    msg.style.top = '70%';
+                    msg.style.transform = 'translateX(-50%)';
+                    msg.style.color = 'red';
+                    msg.style.fontWeight = 'bold';
+                    field.appendChild(msg);
+                    setTimeout(() => msg.remove(), 1000);
+                }
+            });
+            
+            field.appendChild(listenBtn);
+            field.appendChild(callBtn);
+            
+            updateStatus();
+            const statusInterval = setInterval(updateStatus, 2500);
+            
+            setTimeout(() => {
+                clearInterval(statusInterval);
+                showMinigameComplete(`${correctActions} correct actions! ${mistakes === 0 ? 'Perfect timing!' : 'Remember: Listen when coach talks, call when playing!'}`);
+            }, 10000);
+        }
 
-  resetBall(true);
-  document.querySelector('.question').scrollIntoView({behavior:'smooth', block:'center'});
-}
+        // NEW: Calm Down Game (C1 - Stay Calm)
+        function setupCalmDownGame() {
+            const field = document.getElementById('gameField');
+            field.innerHTML = '';
+            
+            let calmBreaths = 0;
+            let missedBreaths = 0;
+            let breathSize = 1;
+            let growing = true;
+            
+            // Bad call scenario
+            const scenario = document.createElement('div');
+            scenario.style.position = 'absolute';
+            scenario.style.top = '10%';
+            scenario.style.width = '100%';
+            scenario.style.textAlign = 'center';
+            scenario.style.fontSize = '1.3em';
+            scenario.style.fontWeight = 'bold';
+            scenario.style.color = 'white';
+            field.appendChild(scenario);
+            
+            // Breathing circle
+            const breathCircle = document.createElement('div');
+            breathCircle.style.position = 'absolute';
+            breathCircle.style.left = '50%';
+            breathCircle.style.top = '50%';
+            breathCircle.style.transform = 'translate(-50%, -50%)';
+            breathCircle.style.width = '100px';
+            breathCircle.style.height = '100px';
+            breathCircle.style.border = '5px solid #4299e1';
+            breathCircle.style.borderRadius = '50%';
+            breathCircle.style.display = 'flex';
+            breathCircle.style.alignItems = 'center';
+            breathCircle.style.justifyContent = 'center';
+            breathCircle.style.background = 'rgba(66, 153, 225, 0.2)';
+            breathCircle.style.cursor = 'pointer';
+            breathCircle.style.fontSize = '1.2em';
+            breathCircle.style.fontWeight = 'bold';
+            breathCircle.style.color = '#4299e1';
+            breathCircle.textContent = 'TAP';
+            field.appendChild(breathCircle);
+            
+            // Instructions
+            const inst = document.createElement('div');
+            inst.style.position = 'absolute';
+            inst.style.bottom = '20%';
+            inst.style.width = '100%';
+            inst.style.textAlign = 'center';
+            inst.style.color = 'white';
+            inst.style.fontWeight = 'bold';
+            inst.textContent = 'TAP when the circle is BIG to take a deep breath!';
+            field.appendChild(inst);
+            
+            const badCalls = [
+                "❌ Referee calls offside!",
+                "❌ Yellow card for you!",
+                "❌ Penalty against your team!",
+                "❌ Goal disallowed!",
+                "❌ Foul called on you!"
+            ];
+            
+            let currentCall = 0;
+            
+            function showBadCall() {
+                if (currentCall < badCalls.length) {
+                    scenario.textContent = badCalls[currentCall];
+                    currentCall++;
+                }
+            }
+            
+            showBadCall();
+            const callInterval = setInterval(showBadCall, 2000);
+            
+            // Breathing animation
+            const breathInterval = setInterval(() => {
+                if (growing) {
+                    breathSize += 0.02;
+                    if (breathSize >= 1.5) {
+                        growing = false;
+                    }
+                } else {
+                    breathSize -= 0.02;
+                    if (breathSize <= 0.8) {
+                        growing = true;
+                        missedBreaths++;
+                    }
+                }
+                
+                breathCircle.style.transform = `translate(-50%, -50%) scale(${breathSize})`;
+                
+                if (breathSize >= 1.3) {
+                    breathCircle.style.background = 'rgba(16, 185, 129, 0.3)';
+                    breathCircle.style.borderColor = '#10b981';
+                    breathCircle.textContent = 'NOW!';
+                } else {
+                    breathCircle.style.background = 'rgba(66, 153, 225, 0.2)';
+                    breathCircle.style.borderColor = '#4299e1';
+                    breathCircle.textContent = 'WAIT';
+                }
+            }, 50);
+            
+            addTapHandler(breathCircle, (e) => {
+                createTouchFeedback(e.pageX || 50, e.pageY || 50, document.body);
+                
+                if (breathSize >= 1.3) {
+                    calmBreaths++;
+                    score += 3;
+                    document.getElementById('minigameScore').textContent = score;
+                    
+                    const msg = document.createElement('div');
+                    msg.textContent = '😌 Good breath! Stay calm!';
+                    msg.className = 'combo-text';
+                    msg.style.left = '50%';
+                    msg.style.top = '30%';
+                    field.appendChild(msg);
+                    setTimeout(() => msg.remove(), 1000);
+                    
+                    breathSize = 0.8;
+                    growing = true;
+                } else {
+                    const msg = document.createElement('div');
+                    msg.textContent = '⏰ Wait for it to grow!';
+                    msg.style.position = 'absolute';
+                    msg.style.left = '50%';
+                    msg.style.top = '30%';
+                    msg.style.transform = 'translateX(-50%)';
+                    msg.style.color = 'yellow';
+                    msg.style.fontWeight = 'bold';
+                    field.appendChild(msg);
+                    setTimeout(() => msg.remove(), 1000);
+                }
+            });
+            
+            setTimeout(() => {
+                clearInterval(breathInterval);
+                clearInterval(callInterval);
+                showMinigameComplete(`${calmBreaths} calm breaths taken! ${missedBreaths < 3 ? 'Great emotional control!' : 'Remember: Deep breaths help you stay calm!'}`);
+            }, 10000);
+        }
 
-function nextQuestion(){
-  state.qIndex++;
-  if(state.qIndex>=5){
-    state.qIndex=0; state.setIndex++;
-    if(state.setIndex>=QUESTION_SETS.length){
-      const best = getBest(); if(state.score>best){ setBest(state.score); }
-      alert(`Full-Time! 🚨\nFinal Score: ${state.score}\nBest (this browser): ${getBest()}\n\nReplay to beat your best!`);
-      state.setIndex=0; state.qIndex=0; state.score=0; state.hearts=3;
-    }
-  }
-  loadCurrent();
-}
+        // NEW: Fair Play Dribble Game (C2 - Control Your Body)
+        function setupFairPlayDribbleGame() {
+            const field = document.getElementById('gameField');
+            field.innerHTML = '';
+            
+            let playerX = 50;
+            let playerY = 80;
+            let score_local = 0;
+            let fouls = 0;
+            
+            // Player with ball
+            const player = document.createElement('div');
+            player.className = 'character';
+            player.textContent = '⚽';
+            player.style.left = playerX + '%';
+            player.style.top = playerY + '%';
+            player.style.fontSize = '2.5em';
+            player.style.transform = 'translate(-50%, -50%)';
+            player.id = 'dribblePlayer';
+            field.appendChild(player);
+            
+            // Create cones to dribble around
+            const cones = [];
+            for (let i = 0; i < 5; i++) {
+                const cone = document.createElement('div');
+                cone.className = 'character';
+                cone.textContent = '🔺';
+                cone.style.left = (20 + i * 15) + '%';
+                cone.style.top = (30 + (i % 2) * 20) + '%';
+                cone.style.fontSize = '2em';
+                cone.style.transform = 'translate(-50%, -50%)';
+                cone.dataset.passed = 'false';
+                cones.push(cone);
+                field.appendChild(cone);
+            }
+            
+            // Swipe controls indicator
+            const swipeHint = document.createElement('div');
+            swipeHint.style.position = 'absolute';
+            swipeHint.style.bottom = '10px';
+            swipeHint.style.width = '100%';
+            swipeHint.style.textAlign = 'center';
+            swipeHint.style.color = 'white';
+            swipeHint.style.fontWeight = 'bold';
+            swipeHint.innerHTML = '👆 SWIPE or use ARROWS to dribble around cones!';
+            field.appendChild(swipeHint);
+            
+            // Arrow buttons for mobile
+            const leftBtn = document.createElement('button');
+            leftBtn.className = 'touch-target';
+            leftBtn.textContent = '⬅️';
+            leftBtn.style.position = 'absolute';
+            leftBtn.style.left = '10px';
+            leftBtn.style.bottom = '50%';
+            leftBtn.style.padding = '15px';
+            leftBtn.style.fontSize = '2em';
+            leftBtn.style.background = 'rgba(66, 153, 225, 0.8)';
+            leftBtn.style.color = 'white';
+            leftBtn.style.border = 'none';
+            leftBtn.style.borderRadius = '10px';
+            
+            const rightBtn = document.createElement('button');
+            rightBtn.className = 'touch-target';
+            rightBtn.textContent = '➡️';
+            rightBtn.style.position = 'absolute';
+            rightBtn.style.right = '10px';
+            rightBtn.style.bottom = '50%';
+            rightBtn.style.padding = '15px';
+            rightBtn.style.fontSize = '2em';
+            rightBtn.style.background = 'rgba(66, 153, 225, 0.8)';
+            rightBtn.style.color = 'white';
+            rightBtn.style.border = 'none';
+            rightBtn.style.borderRadius = '10px';
+            
+            const upBtn = document.createElement('button');
+            upBtn.className = 'touch-target';
+            upBtn.textContent = '⬆️';
+            upBtn.style.position = 'absolute';
+            upBtn.style.left = '50%';
+            upBtn.style.top = '10px';
+            upBtn.style.transform = 'translateX(-50%)';
+            upBtn.style.padding = '15px';
+            upBtn.style.fontSize = '2em';
+            upBtn.style.background = 'rgba(66, 153, 225, 0.8)';
+            upBtn.style.color = 'white';
+            upBtn.style.border = 'none';
+            upBtn.style.borderRadius = '10px';
+            
+            function movePlayer(dx, dy) {
+                playerX = Math.max(10, Math.min(90, playerX + dx));
+                playerY = Math.max(10, Math.min(90, playerY + dy));
+                player.style.left = playerX + '%';
+                player.style.top = playerY + '%';
+                
+                // Check cone collisions
+                cones.forEach(cone => {
+                    const coneX = parseFloat(cone.style.left);
+                    const coneY = parseFloat(cone.style.top);
+                    
+                    if (Math.abs(playerX - coneX) < 8 && Math.abs(playerY - coneY) < 8) {
+                        if (cone.dataset.passed === 'false') {
+                            cone.dataset.passed = 'true';
+                            cone.textContent = '✅';
+                            score_local++;
+                            score += 2;
+                            document.getElementById('minigameScore').textContent = score;
+                            
+                            const msg = document.createElement('div');
+                            msg.textContent = '⚽ Nice dribble!';
+                            msg.className = 'combo-text';
+                            msg.style.left = coneX + '%';
+                            msg.style.top = coneY + '%';
+                            field.appendChild(msg);
+                            setTimeout(() => msg.remove(), 1000);
+                        }
+                    }
+                });
+            }
+            
+            addTapHandler(leftBtn, () => movePlayer(-10, 0));
+            addTapHandler(rightBtn, () => movePlayer(10, 0));
+            addTapHandler(upBtn, () => movePlayer(0, -10));
+            
+            field.appendChild(leftBtn);
+            field.appendChild(rightBtn);
+            field.appendChild(upBtn);
+            
+            // Touch/swipe handling
+            let touchStartX = null;
+            let touchStartY = null;
+            
+            field.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            }, { passive: true });
+            
+            field.addEventListener('touchend', (e) => {
+                if (!touchStartX || !touchStartY) return;
+                
+                const touchEndX = e.changedTouches[0].clientX;
+                const touchEndY = e.changedTouches[0].clientY;
+                
+                const dx = touchEndX - touchStartX;
+                const dy = touchEndY - touchStartY;
+                
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    movePlayer(dx > 0 ? 10 : -10, 0);
+                } else {
+                    movePlayer(0, dy > 0 ? 10 : -10);
+                }
+                
+                touchStartX = null;
+                touchStartY = null;
+            }, { passive: true });
+            
+            setTimeout(() => {
+                showMinigameComplete(`Dribbled past ${score_local} cones! ${fouls === 0 ? 'Perfect ball control!' : 'Remember: Use skill, not force!'}`);
+            }, 10000);
+        }
 
-/* ============ Field Geometry ============ */
-function bounds(){
-  const a = arena.getBoundingClientRect();
-  const pad = 12;
-  const bw = 46, bh = 46;
-  return {
-    minX: pad, maxX: a.width - pad - bw,
-    minY: pad, maxY: a.height - pad - bh,
-    w: a.width, h: a.height
-  };
-}
-function centerBallXY(){ return {cx: state.ballX + BALL_R, cy: state.ballY + BALL_R}; }
-function setBall(x,y){
-  state.ballX = x; state.ballY = y;
-  ball.style.left = x + 'px';
-  ball.style.top  = y + 'px';
-}
-function resetBall(center=false){
-  cancelAnimationFrame(state.raf);
-  state.vx=0; state.vy=0; state.answered=false;
-  const b = bounds();
-  const startX = 40;
-  const startY = center ? (b.h/2 - BALL_R) : Math.min(Math.max(state.ballY, b.minY), b.maxY);
-  setBall(startX, startY);
-  aim.style.display='none';
-}
+        // NEW: Team Spirit Game (E - Encourage)
+        function setupTeamSpiritGame() {
+            const field = document.getElementById('gameField');
+            field.innerHTML = '';
+            
+            let encouraged = 0;
+            let missed = 0;
+            
+            const mistakes = [
+                { emoji: '😢', text: 'Missed goal!' },
+                { emoji: '😔', text: 'Bad pass!' },
+                { emoji: '😞', text: 'Lost ball!' },
+                { emoji: '😟', text: 'Own goal!' },
+                { emoji: '😣', text: 'Penalty miss!' }
+            ];
+            
+            function createUpsetPlayer() {
+                const mistake = mistakes[Math.floor(Math.random() * mistakes.length)];
+                
+                const container = document.createElement('div');
+                container.style.position = 'absolute';
+                container.style.left = (10 + Math.random() * 70) + '%';
+                container.style.top = (10 + Math.random() * 60) + '%';
+                container.style.textAlign = 'center';
+                container.style.cursor = 'pointer';
+                
+                const player = document.createElement('div');
+                player.className = 'character';
+                player.textContent = mistake.emoji;
+                player.style.fontSize = '3em';
+                container.appendChild(player);
+                
+                const text = document.createElement('div');
+                text.style.color = 'white';
+                text.style.fontWeight = 'bold';
+                text.style.marginTop = '5px';
+                text.style.fontSize = '0.9em';
+                text.textContent = mistake.text;
+                container.appendChild(text);
+                
+                addTapHandler(container, (e) => {
+                    createTouchFeedback(e.pageX || 50, e.pageY || 50, document.body);
+                    
+                    player.textContent = '😊';
+                    text.textContent = 'Thanks!';
+                    encouraged++;
+                    score += 3;
+                    document.getElementById('minigameScore').textContent = score;
+                    
+                    const encouragements = [
+                        '👏 "Great effort!"',
+                        '💪 "You\'ll get it next time!"',
+                        '⭐ "Keep trying!"',
+                        '🤝 "We\'re a team!"',
+                        '❤️ "It\'s okay!"'
+                    ];
+                    
+                    const msg = document.createElement('div');
+                    msg.textContent = encouragements[Math.floor(Math.random() * encouragements.length)];
+                    msg.className = 'combo-text';
+                    msg.style.left = container.style.left;
+                    msg.style.top = container.style.top;
+                    field.appendChild(msg);
+                    setTimeout(() => msg.remove(), 1500);
+                    
+                    container.style.pointerEvents = 'none';
+                });
+                
+                field.appendChild(container);
+                
+                setTimeout(() => {
+                    if (player.textContent !== '😊') {
+                        missed++;
+                        const missMsg = document.createElement('div');
+                        missMsg.textContent = '❌ Teammate needed support!';
+                        missMsg.style.position = 'absolute';
+                        missMsg.style.left = container.style.left;
+                        missMsg.style.top = container.style.top;
+                        missMsg.style.color = 'red';
+                        missMsg.style.fontWeight = 'bold';
+                        field.appendChild(missMsg);
+                        setTimeout(() => missMsg.remove(), 1000);
+                    }
+                    container.remove();
+                }, 3000);
+            }
+            
+            const playerInterval = setInterval(createUpsetPlayer, 1800);
+            
+            setTimeout(() => {
+                clearInterval(playerInterval);
+                showMinigameComplete(`Encouraged ${encouraged} teammates! ${missed === 0 ? 'Amazing team spirit!' : 'Remember: Always support your team!'}`);
+            }, 10000);
+        }
 
-/* ============ Kicking (Pointer Events) ============ */
-function powerScale(){
-  // scale with field width so phones/tablets feel similar
-  const s = bounds().w / 1000;
-  return Math.max(POWER_MIN, Math.min(POWER_MAX, POWER_BASE * s));
-}
-function pointInArena(e){
-  const a = arena.getBoundingClientRect();
-  return { x: e.clientX - a.left, y: e.clientY - a.top };
-}
+        // NEW: Respect Rally Game (R - Respect)
+        function setupRespectRallyGame() {
+            const field = document.getElementById('gameField');
+            field.innerHTML = '';
+            
+            let respectful = 0;
+            let disrespectful = 0;
+            
+            const situations = [
+                {
+                    text: "Opponent scores a great goal!",
+                    good: "👏 Applaud",
+                    bad: "😤 Complain"
+                },
+                {
+                    text: "Referee makes a call!",
+                    good: "👍 Accept it",
+                    bad: "😡 Argue"
+                },
+                {
+                    text: "Opponent helps you up!",
+                    good: "🤝 Say thanks",
+                    bad: "🙄 Ignore them"
+                },
+                {
+                    text: "Your team wins!",
+                    good: "🤝 Shake hands",
+                    bad: "🕺 Mock dance"
+                },
+                {
+                    text: "Coach gives feedback!",
+                    good: "👂 Listen well",
+                    bad: "🗣️ Talk back"
+                }
+            ];
+            
+            let currentSituation = 0;
+            
+            function showSituation() {
+                field.innerHTML = '';
+                
+                if (currentSituation >= situations.length) {
+                    showMinigameComplete(`${respectful} respectful choices! ${disrespectful === 0 ? 'Perfect sportsmanship!' : 'Remember: Respect everyone!'}`);
+                    return;
+                }
+                
+                const situation = situations[currentSituation];
+                
+                const text = document.createElement('div');
+                text.textContent = situation.text;
+                text.style.position = 'absolute';
+                text.style.top = '20%';
+                text.style.width = '100%';
+                text.style.textAlign = 'center';
+                text.style.fontSize = '1.4em';
+                text.style.fontWeight = 'bold';
+                text.style.color = 'white';
+                field.appendChild(text);
+                
+                const goodBtn = document.createElement('button');
+                goodBtn.className = 'touch-target';
+                goodBtn.innerHTML = situation.good;
+                goodBtn.style.position = 'absolute';
+                goodBtn.style.left = '25%';
+                goodBtn.style.top = '50%';
+                goodBtn.style.transform = 'translateX(-50%)';
+                goodBtn.style.padding = '20px';
+                goodBtn.style.fontSize = '1.4em';
+                goodBtn.style.background = '#10b981';
+                goodBtn.style.color = 'white';
+                goodBtn.style.border = 'none';
+                goodBtn.style.borderRadius = '15px';
+                goodBtn.style.fontWeight = 'bold';
+                goodBtn.style.minWidth = '120px';
+                
+                const badBtn = document.createElement('button');
+                badBtn.className = 'touch-target';
+                badBtn.innerHTML = situation.bad;
+                badBtn.style.position = 'absolute';
+                badBtn.style.right = '25%';
+                badBtn.style.top = '50%';
+                badBtn.style.transform = 'translateX(50%)';
+                badBtn.style.padding = '20px';
+                badBtn.style.fontSize = '1.4em';
+                badBtn.style.background = '#ef4444';
+                badBtn.style.color = 'white';
+                badBtn.style.border = 'none';
+                badBtn.style.borderRadius = '15px';
+                badBtn.style.fontWeight = 'bold';
+                badBtn.style.minWidth = '120px';
+                
+                addTapHandler(goodBtn, (e) => {
+                    createTouchFeedback(e.pageX || 50, e.pageY || 50, document.body);
+                    respectful++;
+                    score += 3;
+                    document.getElementById('minigameScore').textContent = score;
+                    currentSituation++;
+                    
+                    const msg = document.createElement('div');
+                    msg.textContent = '✅ Respectful choice!';
+                    msg.className = 'combo-text';
+                    msg.style.left = '50%';
+                    msg.style.top = '80%';
+                    field.appendChild(msg);
+                    
+                    setTimeout(showSituation, 1500);
+                });
+                
+                addTapHandler(badBtn, (e) => {
+                    createTouchFeedback(e.pageX || 50, e.pageY || 50, document.body);
+                    disrespectful++;
+                    currentSituation++;
+                    
+                    const msg = document.createElement('div');
+                    msg.textContent = '❌ Not respectful!';
+                    msg.style.position = 'absolute';
+                    msg.style.left = '50%';
+                    msg.style.top = '80%';
+                    msg.style.transform = 'translateX(-50%)';
+                    msg.style.color = 'red';
+                    msg.style.fontWeight = 'bold';
+                    msg.style.fontSize = '1.3em';
+                    field.appendChild(msg);
+                    
+                    setTimeout(showSituation, 1500);
+                });
+                
+                field.appendChild(goodBtn);
+                field.appendChild(badBtn);
+            }
+            
+            showSituation();
+        }
 
-ball.addEventListener('pointerdown', (e)=>{
-  e.preventDefault();
-  state.dragging = true;
-  state.pointerId = e.pointerId;
-  ball.setPointerCapture(e.pointerId);
+        function showMinigameComplete(message) {
+            clearInterval(minigameTimer);
+            document.getElementById('timerBar').style.display = 'none';
+            
+            const field = document.getElementById('gameField');
+            field.innerHTML = '';
+            
+            const msgDiv = document.createElement('div');
+            msgDiv.style.position = 'absolute';
+            msgDiv.style.top = '50%';
+            msgDiv.style.left = '50%';
+            msgDiv.style.transform = 'translate(-50%, -50%)';
+            msgDiv.style.background = 'white';
+            msgDiv.style.padding = '25px';
+            msgDiv.style.borderRadius = '15px';
+            msgDiv.style.fontSize = '1.3em';
+            msgDiv.style.textAlign = 'center';
+            msgDiv.style.boxShadow = '0 4px 20px rgba(0,0,0,0.2)';
+            msgDiv.style.maxWidth = '90%';
+            msgDiv.textContent = message;
+            
+            field.appendChild(msgDiv);
+            
+            updateStars();
+            document.getElementById('continueBtn').style.display = 'inline-block';
+        }
 
-  // Start from ball center to make the slingshot feel natural
-  const {cx, cy} = centerBallXY();
-  state.dragStart = { x: cx, y: cy };
+        function nextQuestion() {
+            currentQuestion++;
+            
+            if (currentQuestion >= scenarios.length) {
+                endGame();
+            } else {
+                document.querySelector('.minigame-screen').classList.remove('active');
+                document.querySelector('.game-screen').classList.add('active');
+                loadQuestion();
+                updateProgress();
+            }
+        }
 
-  // Show aim helper
-  aim.style.display='block';
-  aimDot.style.left = `${cx}px`; aimDot.style.top = `${cy}px`;
-  aimLine.style.position='absolute'; aimLine.style.left = `${cx}px`; aimLine.style.top = `${cy}px`;
-  aimLine.style.width = '0px'; aimLine.style.height = '3px';
+        function updateStars() {
+            const percentage = (score / 200) * 100;
+            let stars = '';
+            
+            if (percentage >= 90) stars = '⭐⭐⭐⭐⭐';
+            else if (percentage >= 70) stars = '⭐⭐⭐⭐';
+            else if (percentage >= 50) stars = '⭐⭐⭐';
+            else if (percentage >= 30) stars = '⭐⭐';
+            else stars = '⭐';
+            
+            document.getElementById('stars').textContent = stars;
+            if (document.getElementById('minigameStars')) {
+                document.getElementById('minigameStars').textContent = stars;
+            }
+        }
 
-  // Pause motion while aiming
-  state.vx = state.vy = 0;
-  cancelAnimationFrame(state.raf);
-});
-ball.addEventListener('pointermove', (e)=>{
-  if(!state.dragging || e.pointerId !== state.pointerId) return;
-  e.preventDefault();
-  const pt = pointInArena(e);
-  const dx = state.dragStart.x - pt.x;
-  const dy = state.dragStart.y - pt.y;
-  const raw = Math.hypot(dx,dy);
-  // Mild easing so short pulls still kick
-  const power = Math.min(140, raw * 0.6);
-  const angle = Math.atan2(dy, dx);
-  aimLine.style.display='block';
-  aimLine.style.width = `${power}px`;
-  aimLine.style.transform = `rotate(${angle}rad)`;
-});
-function endKick(e){
-  if(!state.dragging || e.pointerId !== state.pointerId) return;
-  e.preventDefault();
-  state.dragging = false;
-  aim.style.display='none';
+        function updateProgress() {
+            const totalLevels = scenarios.length * 2;
+            const currentLevel = currentQuestion * 2;
+            const progress = (currentLevel / totalLevels) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+            document.getElementById('progress').textContent = Math.round(progress) + '%';
+        }
 
-  const pt = pointInArena(e);
-  const dx = (state.dragStart.x - pt.x);
-  const dy = (state.dragStart.y - pt.y);
-  const s = powerScale();
-  state.vx = Math.max(-MAX_V, Math.min(MAX_V, dx * s));
-  state.vy = Math.max(-MAX_V, Math.min(MAX_V, dy * s));
-  if (navigator.vibrate) { navigator.vibrate(15); }
-
-  cancelAnimationFrame(state.raf);
-  state.lastTS = 0;
-  state.raf = requestAnimationFrame(step);
-}
-ball.addEventListener('pointerup', endKick);
-ball.addEventListener('pointercancel', endKick);
-ball.addEventListener('lostpointercapture', endKick);
-
-/* ============ Animation & Collisions ============ */
-function step(ts){
-  state.raf = requestAnimationFrame(step);
-  const dt = Math.max(0.2, Math.min(2.0, (ts - (state.lastTS||ts)) / 16.67));
-  state.lastTS = ts;
-
-  const b = bounds();
-  // previous center
-  const prev = centerBallXY();
-
-  // integrate
-  let x = state.ballX + state.vx * dt;
-  let y = state.ballY + state.vy * dt;
-
-  // walls/bounce
-  if(x < b.minX){ x=b.minX; state.vx = -state.vx * BOUNCE; }
-  if(x > b.maxX){ x=b.maxX; state.vx = -state.vx * BOUNCE; }
-  if(y < b.minY){ y=b.minY; state.vy = -state.vy * BOUNCE; }
-  if(y > b.maxY){ y=b.maxY; state.vy = -state.vy * BOUNCE; }
-
-  setBall(x,y);
-
-  // friction
-  state.vx *= FRICTION; state.vy *= FRICTION;
-
-  // check goals (segment-through-rect + expanded hitbox)
-  const now = centerBallXY();
-  if(checkGoalHit(prev.cx, prev.cy, now.cx, now.cy)){
-    cancelAnimationFrame(state.raf);
-  }
-
-  // stop when slow
-  if(Math.hypot(state.vx, state.vy) < 0.18){
-    state.vx = state.vy = 0;
-    cancelAnimationFrame(state.raf);
-  }
-}
-
-function pointInRect(px,py,r){ return px>=r.left && px<=r.right && py>=r.top && py<=r.bottom; }
-function onSeg(ax,ay,bx,by,cx,cy){ return Math.min(ax,bx)-1e-6<=cx && cx<=Math.max(ax,bx)+1e-6 && Math.min(ay,by)-1e-6<=cy && cy<=Math.max(ay,by)+1e-6; }
-function orient(ax,ay,bx,by,cx,cy){ const v=(by-ay)*(cx-bx)-(bx-ax)*(cy-by); return Math.abs(v)<1e-6?0:(v>0?1:2); }
-function segsIntersect(ax,ay,bx,by,cx,cy,dx,dy){
-  const o1=orient(ax,ay,bx,by,cx,cy), o2=orient(ax,ay,bx,by,dx,dy), o3=orient(cx,cy,dx,dy,ax,ay), o4=orient(cx,cy,dx,dy,bx,by);
-  if(o1!==o2 && o3!==o4) return true;
-  if(o1===0 && onSeg(ax,ay,bx,by,cx,cy)) return true;
-  if(o2===0 && onSeg(ax,ay,bx,by,dx,dy)) return true;
-  if(o3===0 && onSeg(cx,cy,dx,dy,ax,ay)) return true;
-  if(o4===0 && onSeg(cx,cy,dx,dy,bx,by)) return true;
-  return false;
-}
-function segIntersectsRect(x1,y1,x2,y2,r){
-  if(pointInRect(x1,y1,r) || pointInRect(x2,y2,r)) return true;
-  return segsIntersect(x1,y1,x2,y2, r.left,r.top, r.right,r.top) ||
-         segsIntersect(x1,y1,x2,y2, r.right,r.top, r.right,r.bottom) ||
-         segsIntersect(x1,y1,x2,y2, r.right,r.bottom, r.left,r.bottom) ||
-         segsIntersect(x1,y1,x2,y2, r.left,r.bottom, r.left,r.top);
-}
-function rectRelativeToArena(el){
-  const ar = arena.getBoundingClientRect();
-  const r = el.getBoundingClientRect();
-  return { left: r.left - ar.left, top: r.top - ar.top, right: r.right - ar.left, bottom: r.bottom - ar.top };
-}
-function expandRect(r, pad){ return { left:r.left-pad, top:r.top-pad, right:r.right+pad, bottom:r.bottom+pad }; }
-
-function checkGoalHit(px,py,cx,cy){
-  if(state.answered) return false;
-  const goals = arena.querySelectorAll('.goal');
-  for(const g of goals){
-    const base = rectRelativeToArena(g);
-    const r = expandRect(base, BALL_R); // let grazes count
-    if(segIntersectsRect(px,py,cx,cy,r)){
-      handleAnswer(g.getAttribute('data-letter'));
-      return true;
-    }
-  }
-  return false;
-}
-
-/* ============ Answer/Overlay/Score ============ */
-function showOverlay(isCorrect, explain){
-  overlayTitle.className = 'big ' + (isCorrect ? 'good' : 'bad');
-  overlayTitle.textContent = isCorrect ? 'GOAL! ✅' : 'Missed Shot ❌';
-  overlayExplain.textContent = explain || '';
-  overlayPrompt.innerHTML = currentQ().stem;
-  overlay.style.display='flex';
-  nextBtn.focus();
-}
-function handleAnswer(letter){
-  state.answered = true;
-  const map = {A:0,B:1,C:2,D:3};
-  const pick = map[letter];
-  const q = currentQ();
-  const isCorrect = pick === q.correct;
-  if(isCorrect){
-    state.score += 2; scoreEl.textContent = state.score;
-    const best = getBest(); if(state.score > best){ setBest(state.score); bestEl.textContent = state.score; }
-  }else{
-    state.hearts = Math.max(0, state.hearts - 1); heartsEl.textContent = state.hearts;
-  }
-  showOverlay(isCorrect, q.why);
-
-  if(state.hearts===0){
-    setTimeout(()=>{
-      alert('Out of hearts! Resetting this rule set.');
-      state.hearts = 3; heartsEl.textContent='3'; state.qIndex = 0; loadCurrent();
-    }, 80);
-  }
-}
-nextBtn.addEventListener('click', ()=>{ overlay.style.display='none'; nextQuestion(); });
-retryBtn.addEventListener('click', ()=>{ overlay.style.display='none'; resetBall(false); arena.scrollIntoView({behavior:'smooth', block:'center'}); });
-
-/* ============ Start + Init ============ */
-startBtn.addEventListener('click', ()=>{
-  startOverlay.style.display='none';
-  applyTheme(themeSelectStart.value);
-  document.querySelector('.question').scrollIntoView({behavior:'smooth', block:'center'});
-});
-bestEl.textContent = getBest();
-(function init(){
-  applyTheme(getTheme());
-  loadCurrent();
-  // keep ball centered vertically if the field resizes
-  window.addEventListener('resize', ()=> resetBall(true));
-})();
-</script>
+        function endGame() {
+            document.querySelector('.game-screen').classList.remove('active');
+            document.querySelector('.minigame-screen').classList.remove('active');
+            document.querySelector('.end-screen').classList.add('active');
+            
+            document.getElementById('finalScore').textContent = score;
+            
+            const badgesDiv = document.getElementById('badges');
+            const messageDiv = document.getElementById('finalMessage');
+            
+            if (score >= 180) {
+                badgesDiv.innerHTML = '<span class="badge">⚽ SOCCER Superstar!</span><span class="badge">🏆 Perfect Player!</span><span class="badge">🎮 Game Master!</span>';
+                messageDiv.textContent = "Incredible! You've mastered ALL the SOCCER rules! You're a true champion!";
+            } else if (score >= 140) {
+                badgesDiv.innerHTML = '<span class="badge">⭐ All-Star Player!</span><span class="badge">🎯 Rule Expert!</span>';
+                messageDiv.textContent = "Excellent work! You really know the SOCCER rules!";
+            } else if (score >= 100) {
+                badgesDiv.innerHTML = '<span class="badge">👍 Good Sport!</span>';
+                messageDiv.textContent = "Nice effort! You're learning the rules well. Keep practicing!";
+            } else {
+                badgesDiv.innerHTML = '<span class="badge">🌱 Rising Star!</span>';
+                messageDiv.textContent = "Keep practicing! Every champion started somewhere. Try again!";
+            }
+        }
+    </script>
 </body>
 </html>
